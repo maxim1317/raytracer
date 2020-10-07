@@ -126,6 +126,18 @@ func NewRandInUnitSphere() *Vec3 {
 	}
 }
 
+func NewRandUnit() *Vec3 {
+	v := new(Vec3)
+	a := ut.RandRange(0, 2*math.Pi)
+	z := ut.RandRange(-1.0, 1.0)
+	r := math.Sqrt(1 - z*z)
+
+	v.x = r * math.Cos(a)
+	v.y = r * math.Sin(a)
+	v.z = z
+	return v
+}
+
 func (v *Vec3) Clip(min, max float64) *Vec3 {
 	newV := new(Vec3)
 	switch {
