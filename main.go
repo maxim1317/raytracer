@@ -38,14 +38,21 @@ func writePixel(file *os.File, pixel *c.Color, samplesPerPixel int) {
 }
 
 func rayColor(r *vec.Ray, world *h.World, depth int) *c.Color {
+	if r.Dir == nil {
+		fmt.Printf("%v", depth)
+	}
 	if depth <= 0 {
 		return c.Black()
 	}
 	color := new(c.Color)
 	var rec *h.HitRecord = &h.HitRecord{}
 	if (*world).Hit(r, 0.001, math.MaxFloat64, rec) {
-		target := rec.P.Add(rec.Normal).Add(vec.NewRandUnit())
-		return rayColor(vec.NewRay(rec.P, target), world, depth-1).MulScalar(0.5)
+		scattered := new(vec.Ray)
+		attenuation := c.Black()
+		if rec.Mat.Scatter(r, rec, attenuation, scattered) {
+			return attenuation.Mul(rayColor(scattered, world, depth-1))
+		}
+		return c.Black()
 	}
 
 	unitDir := r.Dir.GetNormal()
@@ -65,17 +72,26 @@ func main() {
 	const imageWidth int = 400
 	const imageHeight int = int(float64(imageWidth) / aspectRatio)
 	const samplesPerPixel = 100
-	const maxDepth = 50
+	const maxDepth = 30
 
 	// World
 
-	sphere := h.NewSphere(vec.New(0, 0, -1), 0.5)
-	floor := h.NewSphere(vec.New(0, -100.5, -1), 100)
+	materialGround := h.NewLambertian(c.New(0.8, 0.8, 0.0))
+	materialCenter := h.NewLambertian(c.New(0.7, 0.3, 0.3))
+	materialLeft := h.NewMetal(c.New(0.8, 0.8, 0.8))
+	materialRight := h.NewMetal(c.New(0.8, 0.6, 0.2))
+
+	sphereGround := h.NewSphere(vec.New(0.0, -100.5, -1.0), 100.0, materialGround)
+	sphereCenter := h.NewSphere(vec.New(0.0, 0.0, -1.0), 0.5, materialCenter)
+	sphereLeft := h.NewSphere(vec.New(-1.0, 0.0, -1.0), 0.5, materialLeft)
+	sphereRight := h.NewSphere(vec.New(1.0, 0.0, -1.0), 0.5, materialRight)
 
 	var world h.World = h.World{}
 
-	world.Add(sphere)
-	world.Add(floor)
+	world.Add(sphereGround)
+	world.Add(sphereCenter)
+	world.Add(sphereLeft)
+	world.Add(sphereRight)
 
 	// Camera
 
@@ -94,6 +110,7 @@ func main() {
 
 	startTime := time.Now()
 	for j := imageHeight - 1; j >= 0; j-- {
+		fmt.Printf("Scanline %v out of %v\n", imageHeight-j, imageHeight)
 		for i := 0; i < imageWidth; i++ {
 			var u, v float64
 

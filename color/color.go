@@ -68,6 +68,14 @@ func (c *Color) Sub(v2 *Color) *Color {
 	return newC
 }
 
+func (c *Color) Mul(v2 *Color) *Color {
+	newC := new(Color)
+	newC.r = c.r * v2.r
+	newC.g = c.g * v2.g
+	newC.b = c.b * v2.b
+	return newC
+}
+
 func (c *Color) Dot(v2 *Color) float64 {
 	return c.r*v2.r + c.g*v2.g + c.b*v2.b
 }

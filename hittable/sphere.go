@@ -9,13 +9,15 @@ import (
 type Sphere struct {
 	center *vec.Vec3
 	radius float64
+	Material
 }
 
-func NewSphere(center *vec.Vec3, radius float64) *Sphere {
-	s := new(Sphere)
-	s.center = center
-	s.radius = radius
-	return s
+func NewSphere(center *vec.Vec3, radius float64, mat Material) *Sphere {
+	return &Sphere{
+		center:   center,
+		radius:   radius,
+		Material: mat,
+	}
 }
 func (s Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 
@@ -39,6 +41,7 @@ func (s Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.center).DivScalar(s.radius)
 			rec.SetFaceNormal(r, outwardNormal)
+			rec.Mat = s.Material
 			return true
 		}
 
@@ -48,6 +51,7 @@ func (s Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.center).DivScalar(s.radius)
 			rec.SetFaceNormal(r, outwardNormal)
+			rec.Mat = s.Material
 			return true
 		}
 	}
