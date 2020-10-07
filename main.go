@@ -2,78 +2,72 @@ package main
 
 import (
 	"fmt"
-	"math"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 	"time"
 
 	"github.com/maxim1317/raytracer/cam"
-	c "github.com/maxim1317/raytracer/color"
 	h "github.com/maxim1317/raytracer/hittable"
-	ut "github.com/maxim1317/raytracer/utils"
+	"github.com/maxim1317/raytracer/render"
 	"github.com/maxim1317/raytracer/vec"
 )
 
-func check(e error, s string) {
-	if e != nil {
-		fmt.Fprintf(os.Stderr, s, e)
-		panic(e)
-	}
-}
+const (
+	maxFov      = 120.0
+	maxWidth    = 4096
+	maxHeight   = 2160
+	maxSamples  = 1000
+	maxAperture = 0.9
 
-const width int = 256
-const height int = 256
-const color = 255.99
+	minFov      = 10.0
+	minWidth    = 200
+	minHeight   = 100
+	minSamples  = 1
+	minAperture = 0.001
 
-func writePixel(file *os.File, pixel *c.Color, samplesPerPixel int) {
-	pixel = pixel.DivScalar(float64(samplesPerPixel)).Gamma2()
-	pixel = pixel.Clip(0.0, 0.999)
-	file.WriteString(
-		fmt.Sprintf(
-			"%v %v %v\n",
-			int(color*pixel.R()),
-			int(color*pixel.G()),
-			int(color*pixel.B()),
-		),
-	)
-}
+	fov         = 30.0
+	width       = 800
+	height      = 600
+	samples     = 100
+	aperture    = 0.1
+	distToFocus = 10.0
 
-func rayColor(r *vec.Ray, world *h.World, depth int) *c.Color {
-	if r.Dir == nil {
-		fmt.Printf("%v", depth)
-	}
-	if depth <= 0 {
-		return c.Black()
-	}
-	color := new(c.Color)
-	var rec *h.HitRecord = &h.HitRecord{}
-	if (*world).Hit(r, 0.001, math.MaxFloat64, rec) {
-		scattered := new(vec.Ray)
-		attenuation := c.Black()
-		isScut, scattered, attenuation := rec.Mat.Scatter(r, rec, attenuation, scattered)
-		if isScut {
-			return attenuation.Mul(rayColor(scattered, world, depth-1))
-		}
-		return c.Black()
+	progressBarWidth = 80
+)
+
+type fileType int
+
+const (
+	pngType fileType = iota
+	jpegType
+)
+
+var (
+	cpus    int
+	file    string
+	x, y, z float64
+	version bool
+
+	imageTypes = map[string]interface{}{
+		".png":  pngType,
+		".jpg":  jpegType,
+		".jpeg": jpegType,
 	}
 
-	unitDir := r.Dir.GetNormal()
-	t := 0.5 * (unitDir.Y() + 1.0)
-	unit := vec.NewUnit()
-	blue := vec.New(0.5, 0.7, 1.0)
-	return color.FromVec3(unit.MulScalar(1.0 - t).Add(blue.MulScalar(t)))
-}
+	lookFrom *vec.Vec3 = vec.New(13, 3, 2)
+	lookAt   *vec.Vec3 = vec.New(0, 0, 0)
+	vUp      *vec.Vec3 = vec.New(0, 1, 0)
+)
 
 func main() {
-	var err error
-	var file *os.File
+	cpus = runtime.NumCPU()
 
-	// Image
-
-	aspectRatio := 3.0 / 2.0
-	imageWidth := 400
-	imageHeight := int(float64(imageWidth) / aspectRatio)
-	samplesPerPixel := 100
-	maxDepth := 30
+	start := time.Now()
 
 	// World
 
@@ -81,50 +75,63 @@ func main() {
 
 	// Camera
 
-	lookFrom := vec.New(13, 3, 2)
-	lookAt := vec.New(0, 0, 0)
-	vUp := vec.New(0, 1, 0)
-	distToFocus := 10.0
-	aperture := 0.1
-
-	camera := cam.NewCamera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus)
+	camera := cam.NewCamera(lookFrom, lookAt, vUp, fov, float64(width)/float64(height), aperture, distToFocus)
 
 	// Render
 
-	const filename = "out.ppm"
+	fmt.Printf("\nRendering %d x %d pixel scene with %d objects:", width, height, world.Count())
+	fmt.Printf("\n[%d cpus, %d samples/pixel, %.2f° fov, %.2f aperture]", cpus, samples, fov, aperture)
 
-	file, err = os.Create(filename)
-	check(err, "Couldn't open the file")
+	ch := make(chan int, height)
+	defer close(ch)
 
-	defer file.Close()
+	go outputProgress(ch, height)
 
-	file.WriteString(fmt.Sprintf("P3\n%v %v\n255\n", imageWidth, imageHeight))
+	image := render.Do(world, camera, cpus, samples, width, height, ch)
 
-	startTime := time.Now()
-	for j := imageHeight - 1; j >= 0; j-- {
-		fmt.Printf("Scanline %v out of %v\n", imageHeight-j, imageHeight)
-		for i := 0; i < imageWidth; i++ {
-			var u, v float64
-
-			pixel := c.Black()
-
-			for s := 0; s < samplesPerPixel; s++ {
-				u = (float64(i) + ut.Rand()) / float64(imageWidth-1)
-				v = (float64(j) + ut.Rand()) / float64(imageHeight-1)
-
-				ray := camera.RayAt(u, v)
-				pixel = pixel.Add(rayColor(ray, world, maxDepth))
-			}
-
-			writePixel(file, pixel, samplesPerPixel)
-		}
+	if err := writeFile("out.png", image); err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
 	}
-	endTime := time.Now()
-	passed := endTime.Sub(startTime)
-	fmt.Printf("Seconds passed: %v\n", passed)
 
-	// for i := 0; i < count; i++ {
+	fmt.Printf("\nDone. Elapsed: %v", time.Since(start))
+	fmt.Printf("\nOutput to: %s\n", file)
+}
 
-	// }
+func outputProgress(ch <-chan int, rows int) {
+	fmt.Println()
+	for i := 1; i <= rows; i++ {
+		<-ch
+		pct := 100 * float64(i) / float64(rows)
+		filled := (progressBarWidth * i) / rows
+		bar := strings.Repeat("=", filled) + strings.Repeat("-", progressBarWidth-filled)
+		fmt.Printf("\r[%s] %.2f%%", bar, pct)
+	}
+	fmt.Println()
+}
 
+func writeFile(path string, img image.Image) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if cerr := file.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
+
+	ext := strings.ToLower(filepath.Ext(path))
+
+	switch imageType := imageTypes[ext]; imageType {
+	case jpegType:
+		err = jpeg.Encode(file, img, nil)
+	case pngType:
+		err = png.Encode(file, img)
+	default:
+		err = fmt.Errorf("Invalid extension: %s", ext)
+	}
+
+	return err
 }

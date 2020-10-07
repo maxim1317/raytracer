@@ -7,18 +7,22 @@ import (
 )
 
 type World struct {
-	Elements []*Hittable
+	elements []*Hittable
 }
 
 func (w *World) Add(h Hittable) {
-	w.Elements = append(w.Elements, &h)
+	w.elements = append(w.elements, &h)
+}
+
+func (w *World) Count() int {
+	return len(w.elements)
 }
 
 func (w *World) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 	hitAnything := false
 	closest := tMax
 
-	for _, element := range w.Elements {
+	for _, element := range w.elements {
 		hit := (*element).Hit(r, tMin, closest, rec)
 
 		if hit {

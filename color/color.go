@@ -165,3 +165,14 @@ func (c *Color) Clip(min, max float64) *Color {
 	}
 	return newC
 }
+
+// For compatibility with image.Color
+
+func (c *Color) RGBA() (r, g, b, a uint32) {
+	// Sqrt() for gamma-2 correction
+	r = uint32(math.Sqrt(c.r) * 0xffff)
+	g = uint32(math.Sqrt(c.g) * 0xffff)
+	b = uint32(math.Sqrt(c.b) * 0xffff)
+	a = 0xffff
+	return
+}
