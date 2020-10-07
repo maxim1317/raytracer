@@ -31,29 +31,31 @@ func (v *Vec3) Length() float64 {
 }
 
 func (v *Vec3) MulScalar(s float64) *Vec3 {
-	v.x = v.x * s
-	v.y = v.y * s
-	v.z = v.z * s
-	return v
+	newV := new(Vec3)
+	newV.x = v.x * s
+	newV.y = v.y * s
+	newV.z = v.z * s
+	return newV
 }
 
 func (v *Vec3) DivScalar(s float64) *Vec3 {
-	v.MulScalar(1 / s)
-	return v
+	return v.MulScalar(1 / s)
 }
 
 func (v *Vec3) Add(v2 *Vec3) *Vec3 {
-	v.x = v.x + v2.x
-	v.y = v.y + v2.y
-	v.z = v.z + v2.z
-	return v
+	newV := new(Vec3)
+	newV.x = v.x + v2.x
+	newV.y = v.y + v2.y
+	newV.z = v.z + v2.z
+	return newV
 }
 
 func (v *Vec3) Sub(v2 *Vec3) *Vec3 {
-	v.x = v.x - v2.x
-	v.y = v.y - v2.y
-	v.z = v.z - v2.z
-	return v
+	newV := new(Vec3)
+	newV.x = v.x - v2.x
+	newV.y = v.y - v2.y
+	newV.z = v.z - v2.z
+	return newV
 }
 
 func (v *Vec3) Dot(v2 *Vec3) float64 {
@@ -61,52 +63,69 @@ func (v *Vec3) Dot(v2 *Vec3) float64 {
 }
 
 func (v *Vec3) Cross(v2 *Vec3) *Vec3 {
-	v.x = v.y*v2.z - v.z*v2.y
-	v.y = v.z*v2.x - v.x*v2.z
-	v.z = v.x*v2.y - v.y*v2.x
-	return v
+	newV := new(Vec3)
+	newV.x = v.y*v2.z - v.z*v2.y
+	newV.y = v.z*v2.x - v.x*v2.z
+	newV.z = v.x*v2.y - v.y*v2.x
+	return newV
 }
 
-func (v Vec3) GetNormal() Vec3 {
-	v.DivScalar(v.Length())
-	return v
+func (v Vec3) GetNormal() *Vec3 {
+	return v.DivScalar(v.Length())
 }
 
 // New func: create new Vec3
-func New(x, y, z float64) Vec3 {
-	return Vec3{x, y, z}
+func New(x, y, z float64) *Vec3 {
+	vec := new(Vec3)
+	vec.x = x
+	vec.y = y
+	vec.z = z
+	return vec
 }
 
-func NewZero() Vec3 {
-	return Vec3{0, 0, 0}
+func NewZero() *Vec3 {
+	vec := new(Vec3)
+	vec.x = 0
+	vec.y = 0
+	vec.z = 0
+	return vec
 }
 
-func NewUnit() Vec3 {
-	return Vec3{1, 1, 1}
+func NewUnit() *Vec3 {
+	vec := new(Vec3)
+	vec.x = 1
+	vec.y = 1
+	vec.z = 1
+	return vec
 }
 
-func NewRand() Vec3 {
-	return Vec3{rand.Float64(), rand.Float64(), rand.Float64()}
+func NewRand() *Vec3 {
+	vec := new(Vec3)
+	vec.x = rand.Float64()
+	vec.y = rand.Float64()
+	vec.z = rand.Float64()
+	return vec
 }
 
 func (v *Vec3) Clip(min, max float64) *Vec3 {
+	newV := new(Vec3)
 	if v.x < min {
-		v.x = min
+		newV.x = min
 	}
 	if v.x > max {
-		v.x = max
+		newV.x = max
 	}
 	if v.y < min {
-		v.y = min
+		newV.y = min
 	}
 	if v.y > max {
-		v.y = max
+		newV.y = max
 	}
 	if v.z < min {
-		v.z = min
+		newV.z = min
 	}
 	if v.z > max {
-		v.z = max
+		newV.z = max
 	}
-	return v
+	return newV
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type Camera struct {
-	lowerLeft, horizontal, vertical, origin vec.Vec3
+	lowerLeft, horizontal, vertical, origin *vec.Vec3
 }
 
 func NewCamera() *Camera {
@@ -23,25 +23,14 @@ func NewCamera() *Camera {
 	c.vertical = vec.New(0.0, viewportHeight, 0.0)
 
 	fc := vec.New(0, 0, focalLength)
-	c.lowerLeft = *c.origin.Sub(c.horizontal.DivScalar(2)).Sub(c.vertical.DivScalar(2)).Sub(&fc)
+	c.lowerLeft = c.origin.Sub(c.horizontal.DivScalar(2)).Sub(c.vertical.DivScalar(2)).Sub(fc)
 
 	return c
 }
 
-func (c *Camera) position(u float64, v float64) *vec.Vec3 {
-	horizontal := c.horizontal.MulScalar(u)
-	vertical := c.vertical.MulScalar(v)
-
-	return horizontal.Add(vertical)
-}
-
-func (c *Camera) direction(position *vec.Vec3) vec.Vec3 {
-	return *c.lowerLeft.Add(position)
-}
-
-func (c *Camera) RayAt(u float64, v float64) vec.Ray {
-	position := c.position(u, v)
-	direction := c.direction(position)
-
-	return vec.NewRay(c.origin, direction)
+func (c *Camera) RayAt(u float64, v float64) *vec.Ray {
+	hor := c.horizontal.MulScalar(u)
+	ver := c.vertical.MulScalar(v)
+	ray := vec.NewRay(*c.origin, *c.lowerLeft.Add(hor).Add(ver))
+	return &ray
 }

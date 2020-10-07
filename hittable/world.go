@@ -5,11 +5,11 @@ import (
 )
 
 type World struct {
-	Elements []Hittable
+	Elements []*Hittable
 }
 
 func (w *World) Add(h Hittable) {
-	w.Elements = append(w.Elements, h)
+	w.Elements = append(w.Elements, &h)
 }
 
 func (w *World) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
@@ -17,7 +17,7 @@ func (w *World) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 	closest := tMax
 
 	for _, element := range w.Elements {
-		hit := element.Hit(r, tMin, closest, rec)
+		hit := (*element).Hit(r, tMin, closest, rec)
 
 		if hit {
 			hitAnything = true

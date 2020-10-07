@@ -41,7 +41,7 @@ func rayColor(r *vec.Ray, world *h.World) *c.Color {
 	var rec *h.HitRecord = &h.HitRecord{}
 	if (*world).Hit(r, 0, math.MaxFloat64, rec) {
 		unit := vec.NewUnit()
-		return color.FromVec3(rec.Normal.Add(&unit).MulScalar(0.5))
+		return color.FromVec3(rec.Normal.Add(unit).MulScalar(0.5))
 	}
 	unitDir := r.Dir.GetNormal()
 	t := 0.5 * (unitDir.Y() + 1.0)
@@ -64,14 +64,8 @@ func main() {
 
 	// World
 
-	sphere := h.Sphere{
-		Center: vec.New(0, 0, -1),
-		Radius: 0.5,
-	}
-	floor := h.Sphere{
-		Center: vec.New(0, -100.5, -1),
-		Radius: 100,
-	}
+	sphere := h.NewSphere(vec.New(0, 0, -1), 0.5)
+	floor := h.NewSphere(vec.New(0, -100.5, -1), 100)
 
 	var world h.World = h.World{}
 
@@ -104,7 +98,7 @@ func main() {
 				v = (float64(j) + ut.Rand()) / float64(imageHeight-1)
 
 				ray := camera.RayAt(u, v)
-				pixel = *pixel.Add(rayColor(&ray, &world))
+				pixel = *pixel.Add(rayColor(ray, &world))
 			}
 
 			writePixel(file, &pixel, samplesPerPixel)
