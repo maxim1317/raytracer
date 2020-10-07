@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"time"
 
 	"github.com/maxim1317/raytracer/cam"
 	c "github.com/maxim1317/raytracer/color"
@@ -24,8 +25,8 @@ const height int = 256
 const color = 255.99
 
 func writePixel(file *os.File, pixel *c.Color, samplesPerPixel int) {
-	pixel.DivScalar(float64(samplesPerPixel))
-	pixel.Clip(0.0, 0.999)
+	pixel = pixel.DivScalar(float64(samplesPerPixel)).Gamma2()
+	pixel = pixel.Clip(0.0, 0.999)
 	file.WriteString(
 		fmt.Sprintf(
 			"%v %v %v\n",
@@ -36,16 +37,19 @@ func writePixel(file *os.File, pixel *c.Color, samplesPerPixel int) {
 	)
 }
 
-func rayColor(r *vec.Ray, world *h.World) *c.Color {
+func rayColor(r *vec.Ray, world *h.World, depth int) *c.Color {
+	if depth <= 0 {
+		return c.Black()
+	}
 	color := new(c.Color)
 	var rec *h.HitRecord = &h.HitRecord{}
 	if (*world).Hit(r, 0, math.MaxFloat64, rec) {
-		unit := vec.NewUnit()
-		return color.FromVec3(rec.Normal.Add(unit).MulScalar(0.5))
+		target := rec.P.Add(rec.Normal).Add(vec.NewRandInUnitSphere())
+		return rayColor(vec.NewRay(rec.P, target), world, depth-1).MulScalar(0.5)
 	}
+
 	unitDir := r.Dir.GetNormal()
 	t := 0.5 * (unitDir.Y() + 1.0)
-
 	unit := vec.NewUnit()
 	blue := vec.New(0.5, 0.7, 1.0)
 	return color.FromVec3(unit.MulScalar(1.0 - t).Add(blue.MulScalar(t)))
@@ -61,6 +65,7 @@ func main() {
 	const imageWidth int = 400
 	const imageHeight int = int(float64(imageWidth) / aspectRatio)
 	const samplesPerPixel = 100
+	const maxDepth = 50
 
 	// World
 
@@ -87,23 +92,27 @@ func main() {
 
 	file.WriteString(fmt.Sprintf("P3\n%v %v\n255\n", imageWidth, imageHeight))
 
+	startTime := time.Now()
 	for j := imageHeight - 1; j >= 0; j-- {
 		for i := 0; i < imageWidth; i++ {
 			var u, v float64
 
-			pixel := c.NewBlack()
+			pixel := c.Black()
 
 			for s := 0; s < samplesPerPixel; s++ {
 				u = (float64(i) + ut.Rand()) / float64(imageWidth-1)
 				v = (float64(j) + ut.Rand()) / float64(imageHeight-1)
 
 				ray := camera.RayAt(u, v)
-				pixel = *pixel.Add(rayColor(ray, &world))
+				pixel = pixel.Add(rayColor(ray, &world, maxDepth))
 			}
 
-			writePixel(file, &pixel, samplesPerPixel)
+			writePixel(file, pixel, samplesPerPixel)
 		}
 	}
+	endTime := time.Now()
+	passed := endTime.Sub(startTime)
+	fmt.Printf("Seconds passed: %v\n", passed)
 
 	// for i := 0; i < count; i++ {
 

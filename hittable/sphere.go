@@ -26,7 +26,7 @@ func (s Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 	var a, halfb, c, discriminant float64
 
 	a = r.Dir.LengthSquared()
-	halfb = oc.Dot(&r.Dir)
+	halfb = oc.Dot(r.Dir)
 	c = oc.LengthSquared() - s.radius*s.radius
 	discriminant = halfb*halfb - a*c
 
@@ -36,7 +36,7 @@ func (s Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 		var temp = (-halfb - root) / a
 		if temp < tMax && temp > tMin {
 			rec.T = temp
-			rec.P = *r.At(rec.T)
+			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.center).DivScalar(s.radius)
 			rec.SetFaceNormal(r, outwardNormal)
 			return true
@@ -45,7 +45,7 @@ func (s Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 		temp = (-halfb + root) / a
 		if temp < tMax && temp > tMin {
 			rec.T = temp
-			rec.P = *r.At(rec.T)
+			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.center).DivScalar(s.radius)
 			rec.SetFaceNormal(r, outwardNormal)
 			return true

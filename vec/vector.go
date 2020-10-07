@@ -2,7 +2,8 @@ package vec
 
 import (
 	"math"
-	"math/rand"
+
+	ut "github.com/maxim1317/raytracer/utils"
 )
 
 // Vec3 type: basic 3D vector
@@ -101,31 +102,55 @@ func NewUnit() *Vec3 {
 
 func NewRand() *Vec3 {
 	vec := new(Vec3)
-	vec.x = rand.Float64()
-	vec.y = rand.Float64()
-	vec.z = rand.Float64()
+	vec.x = ut.Rand()
+	vec.y = ut.Rand()
+	vec.z = ut.Rand()
 	return vec
+}
+
+func NewRandInRange(a, b float64) *Vec3 {
+	vec := new(Vec3)
+	vec.x = ut.RandRange(a, b)
+	vec.y = ut.RandRange(a, b)
+	vec.z = ut.RandRange(a, b)
+	return vec
+}
+
+func NewRandInUnitSphere() *Vec3 {
+	for {
+		p := NewRandInRange(-1.0, 1.0)
+		if p.LengthSquared() >= 1.0 {
+			continue
+		}
+		return p
+	}
 }
 
 func (v *Vec3) Clip(min, max float64) *Vec3 {
 	newV := new(Vec3)
-	if v.x < min {
+	switch {
+	case v.x < min:
 		newV.x = min
-	}
-	if v.x > max {
+	case v.x > max:
 		newV.x = max
+	default:
+		newV.x = v.x
 	}
-	if v.y < min {
+	switch {
+	case v.y < min:
 		newV.y = min
-	}
-	if v.y > max {
+	case v.y > max:
 		newV.y = max
+	default:
+		newV.y = v.y
 	}
-	if v.z < min {
+	switch {
+	case v.z < min:
 		newV.z = min
-	}
-	if v.z > max {
+	case v.z > max:
 		newV.z = max
+	default:
+		newV.z = v.z
 	}
 	return newV
 }

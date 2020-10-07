@@ -31,6 +31,6 @@ func NewCamera() *Camera {
 func (c *Camera) RayAt(u float64, v float64) *vec.Ray {
 	hor := c.horizontal.MulScalar(u)
 	ver := c.vertical.MulScalar(v)
-	ray := vec.NewRay(*c.origin, *c.lowerLeft.Add(hor).Add(ver))
-	return &ray
+	ray := vec.NewRay(c.origin, c.lowerLeft.Add(hor).Add(ver))
+	return ray
 }
