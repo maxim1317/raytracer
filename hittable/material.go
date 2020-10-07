@@ -6,7 +6,7 @@ import (
 )
 
 type Material interface {
-	Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) bool
+	Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) (bool, *vec.Ray, *c.Color)
 }
 
 func Reflect(v, n *vec.Vec3) *vec.Vec3 {

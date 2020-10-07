@@ -49,7 +49,8 @@ func rayColor(r *vec.Ray, world *h.World, depth int) *c.Color {
 	if (*world).Hit(r, 0.001, math.MaxFloat64, rec) {
 		scattered := new(vec.Ray)
 		attenuation := c.Black()
-		if rec.Mat.Scatter(r, rec, attenuation, scattered) {
+		isScut, scattered, attenuation := rec.Mat.Scatter(r, rec, attenuation, scattered)
+		if isScut {
 			return attenuation.Mul(rayColor(scattered, world, depth-1))
 		}
 		return c.Black()

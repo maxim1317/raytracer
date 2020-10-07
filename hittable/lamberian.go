@@ -15,9 +15,9 @@ func NewLambertian(albedo *c.Color) Lambertian {
 	return *l
 }
 
-func (l Lambertian) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) bool {
+func (l Lambertian) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) (bool, *vec.Ray, *c.Color) {
 	scatterDirection := rec.Normal.Add(vec.NewRandUnit())
 	scattered = vec.NewRay(rec.P, scatterDirection)
 	attenuation = l.Albedo
-	return true
+	return true, scattered, attenuation
 }

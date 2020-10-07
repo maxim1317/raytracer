@@ -15,9 +15,9 @@ func NewMetal(albedo *c.Color) Metal {
 	return *m
 }
 
-func (m Metal) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) bool {
+func (m Metal) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) (bool, *vec.Ray, *c.Color) {
 	reflected := Reflect(rIn.Dir, rec.Normal)
 	scattered = vec.NewRay(rec.P, reflected)
 	attenuation = m.Albedo
-	return scattered.Dir.Dot(rec.Normal) > 0
+	return scattered.Dir.Dot(rec.Normal) > 0, scattered, attenuation
 }
