@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math"
 	"math/rand"
 )
 
@@ -16,4 +17,8 @@ func RandRange(a, b float64) float64 {
 		a = c
 	}
 	return a + (b-a)*rand.Float64()
+}
+
+func Degrees2Rad(alpha float64) float64 {
+	return alpha * math.Pi / 180.0
 }

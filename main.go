@@ -98,7 +98,7 @@ func main() {
 
 	// Camera
 
-	camera := cam.NewCamera()
+	camera := cam.NewCamera(vec.New(-2, 2, 1), vec.New(0, 0, -1), vec.New(0, 1, 0), 20.0, aspectRatio)
 
 	// Render
 
