@@ -98,7 +98,13 @@ func main() {
 
 	// Camera
 
-	camera := cam.NewCamera(vec.New(-2, 2, 1), vec.New(0, 0, -1), vec.New(0, 1, 0), 20.0, aspectRatio)
+	lookFrom := vec.New(3, 3, 2)
+	lookAt := vec.New(0, 0, -1)
+	vUp := vec.New(0, 1, 0)
+	distToFocus := (lookFrom.Sub(lookAt)).Length()
+	aperture := 2.0
+
+	camera := cam.NewCamera(lookFrom, lookAt, vUp, 90, aspectRatio, aperture, distToFocus)
 
 	// Render
 

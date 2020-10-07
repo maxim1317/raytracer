@@ -126,6 +126,20 @@ func NewRandInUnitSphere() *Vec3 {
 	}
 }
 
+func NewRandInUnitDisk() *Vec3 {
+	for {
+		p := New(
+			ut.RandRange(-1.0, 1.0),
+			ut.RandRange(-1.0, 1.0),
+			0.0,
+		)
+		if p.LengthSquared() >= 1.0 {
+			continue
+		}
+		return p
+	}
+}
+
 func NewRandUnit() *Vec3 {
 	v := new(Vec3)
 	a := ut.RandRange(0, 2*math.Pi)
