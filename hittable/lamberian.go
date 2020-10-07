@@ -6,18 +6,18 @@ import (
 )
 
 type Lambertian struct {
-	Albedo *c.Color
+	albedo *c.Color
 }
 
 func NewLambertian(albedo *c.Color) Lambertian {
 	l := new(Lambertian)
-	l.Albedo = albedo
+	l.albedo = albedo
 	return *l
 }
 
 func (l Lambertian) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) (bool, *vec.Ray, *c.Color) {
 	scatterDirection := rec.Normal.Add(vec.NewRandUnit())
 	scattered = vec.NewRay(rec.P, scatterDirection)
-	attenuation = l.Albedo
+	attenuation = l.albedo
 	return true, scattered, attenuation
 }

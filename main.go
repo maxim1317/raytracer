@@ -79,8 +79,8 @@ func main() {
 
 	materialGround := h.NewLambertian(c.New(0.8, 0.8, 0.0))
 	materialCenter := h.NewLambertian(c.New(0.7, 0.3, 0.3))
-	materialLeft := h.NewMetal(c.New(0.8, 0.8, 0.8))
-	materialRight := h.NewMetal(c.New(0.8, 0.6, 0.2))
+	materialLeft := h.NewMetal(c.New(0.8, 0.8, 0.8), 0.3)
+	materialRight := h.NewMetal(c.New(0.8, 0.6, 0.2), 1.0)
 
 	sphereGround := h.NewSphere(vec.New(0.0, -100.5, -1.0), 100.0, materialGround)
 	sphereCenter := h.NewSphere(vec.New(0.0, 0.0, -1.0), 0.5, materialCenter)
