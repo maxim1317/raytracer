@@ -43,7 +43,7 @@ func rayColor(r *vec.Ray, world *h.World, depth int) *c.Color {
 	}
 	color := new(c.Color)
 	var rec *h.HitRecord = &h.HitRecord{}
-	if (*world).Hit(r, 0, math.MaxFloat64, rec) {
+	if (*world).Hit(r, 0.001, math.MaxFloat64, rec) {
 		target := rec.P.Add(rec.Normal).Add(vec.NewRandInUnitSphere())
 		return rayColor(vec.NewRay(rec.P, target), world, depth-1).MulScalar(0.5)
 	}
