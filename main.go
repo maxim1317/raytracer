@@ -69,42 +69,25 @@ func main() {
 
 	// Image
 
-	const aspectRatio float64 = 16.0 / 9.0
-	const imageWidth int = 400
-	const imageHeight int = int(float64(imageWidth) / aspectRatio)
-	const samplesPerPixel = 100
-	const maxDepth = 30
+	aspectRatio := 3.0 / 2.0
+	imageWidth := 400
+	imageHeight := int(float64(imageWidth) / aspectRatio)
+	samplesPerPixel := 100
+	maxDepth := 30
 
 	// World
 
-	materialGround := h.NewLambertian(c.New(0.8, 0.8, 0.0))
-	materialCenter := h.NewLambertian(c.New(0.7, 0.3, 0.3))
-	materialLeft := h.NewDielectric(1.5)
-	materialRight := h.NewMetal(c.New(0.8, 0.6, 0.2), 1.0)
-
-	sphereGround := h.NewSphere(vec.New(0.0, -100.5, -1.0), 100.0, materialGround)
-	sphereCenter := h.NewSphere(vec.New(0.0, 0.0, -1.0), 0.5, materialCenter)
-	sphereLeft := h.NewSphere(vec.New(-1.0, 0.0, -1.0), 0.5, materialLeft)
-	sphereLeftInner := h.NewSphere(vec.New(-1.0, 0.0, -1.0), -0.3, materialLeft)
-	sphereRight := h.NewSphere(vec.New(1.0, 0.0, -1.0), 0.5, materialRight)
-
-	var world h.World = h.World{}
-
-	world.Add(sphereGround)
-	world.Add(sphereCenter)
-	world.Add(sphereLeft)
-	world.Add(sphereLeftInner)
-	world.Add(sphereRight)
+	world := h.RandomWorld()
 
 	// Camera
 
-	lookFrom := vec.New(3, 3, 2)
-	lookAt := vec.New(0, 0, -1)
+	lookFrom := vec.New(13, 3, 2)
+	lookAt := vec.New(0, 0, 0)
 	vUp := vec.New(0, 1, 0)
-	distToFocus := (lookFrom.Sub(lookAt)).Length()
-	aperture := 2.0
+	distToFocus := 10.0
+	aperture := 0.1
 
-	camera := cam.NewCamera(lookFrom, lookAt, vUp, 90, aspectRatio, aperture, distToFocus)
+	camera := cam.NewCamera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus)
 
 	// Render
 
@@ -130,7 +113,7 @@ func main() {
 				v = (float64(j) + ut.Rand()) / float64(imageHeight-1)
 
 				ray := camera.RayAt(u, v)
-				pixel = pixel.Add(rayColor(ray, &world, maxDepth))
+				pixel = pixel.Add(rayColor(ray, world, maxDepth))
 			}
 
 			writePixel(file, pixel, samplesPerPixel)
