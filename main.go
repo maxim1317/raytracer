@@ -5,7 +5,10 @@ import (
 	"math"
 	"os"
 
+	"github.com/maxim1317/raytracer/cam"
+	c "github.com/maxim1317/raytracer/color"
 	h "github.com/maxim1317/raytracer/hittable"
+	ut "github.com/maxim1317/raytracer/utils"
 	"github.com/maxim1317/raytracer/vec"
 )
 
@@ -20,43 +23,32 @@ const width int = 256
 const height int = 256
 const color = 255.99
 
-func writePixel(file *os.File, pixel vec.Vector3D) {
+func writePixel(file *os.File, pixel *c.Color, samplesPerPixel int) {
+	pixel.DivScalar(float64(samplesPerPixel))
+	pixel.Clip(0.0, 0.999)
 	file.WriteString(
 		fmt.Sprintf(
 			"%v %v %v\n",
-			int(color*pixel.X),
-			int(color*pixel.Y),
-			int(color*pixel.Z),
+			int(color*pixel.R()),
+			int(color*pixel.G()),
+			int(color*pixel.B()),
 		),
 	)
 }
 
-func hitSphere(center vec.Vector3D, radius float64, ray vec.Ray) float64 {
-	// t^2*b*b + 2*t*b*(A−C) + (A−C)*(A−C) − r^2 = 0
-
-	var oc vec.Vector3D = ray.Orig.Sub(center)
-
-	var a, bHalf, c, discriminant float64
-
-	a = ray.Dir.LengthSquared()
-	bHalf = oc.Dot(ray.Dir)
-	c = oc.LengthSquared() - radius*radius
-	discriminant = bHalf*bHalf - a*c
-
-	if discriminant < 0 {
-		return -1.0
-	}
-	return (-bHalf - math.Sqrt(discriminant)) / a
-}
-
-func rayColor(r *vec.Ray, world *h.World) vec.Vector3D {
+func rayColor(r *vec.Ray, world *h.World) *c.Color {
+	color := new(c.Color)
 	var rec *h.HitRecord = &h.HitRecord{}
 	if (*world).Hit(r, 0, math.MaxFloat64, rec) {
-		return rec.Normal.Add(vec.NewUnitVector3D()).MulScalar(0.5)
+		unit := vec.NewUnit()
+		return color.FromVec3(rec.Normal.Add(&unit).MulScalar(0.5))
 	}
-	var unitDir vec.Vector3D = r.Dir.Normalize()
-	var t float64 = 0.5 * (unitDir.Y + 1.0)
-	return vec.NewUnitVector3D().MulScalar(1.0 - t).Add(vec.NewVector3D(0.5, 0.7, 1.0).MulScalar(t))
+	unitDir := r.Dir.GetNormal()
+	t := 0.5 * (unitDir.Y() + 1.0)
+
+	unit := vec.NewUnit()
+	blue := vec.New(0.5, 0.7, 1.0)
+	return color.FromVec3(unit.MulScalar(1.0 - t).Add(blue.MulScalar(t)))
 }
 
 func main() {
@@ -65,18 +57,19 @@ func main() {
 
 	// Image
 
-	var aspectRatio float64 = 16.0 / 9.0
-	var imageWidth int = 400
-	var imageHeight int = int(float64(imageWidth) / aspectRatio)
+	const aspectRatio float64 = 16.0 / 9.0
+	const imageWidth int = 400
+	const imageHeight int = int(float64(imageWidth) / aspectRatio)
+	const samplesPerPixel = 100
 
 	// World
 
 	sphere := h.Sphere{
-		Center: vec.NewVector3D(0, 0, -1),
+		Center: vec.New(0, 0, -1),
 		Radius: 0.5,
 	}
 	floor := h.Sphere{
-		Center: vec.NewVector3D(0, -100.5, -1),
+		Center: vec.New(0, -100.5, -1),
 		Radius: 100,
 	}
 
@@ -87,17 +80,7 @@ func main() {
 
 	// Camera
 
-	var viewportHeight float64 = 2.0
-	var viewportWidth float64 = viewportHeight * aspectRatio
-	var focalLength float64 = 1.0
-
-	var origin vec.Vector3D = vec.NewZeroVector3D()
-	var horizontal, vertical vec.Vector3D
-
-	horizontal = vec.NewVector3D(viewportWidth, 0, 0)
-	vertical = vec.NewVector3D(0, viewportHeight, 0)
-
-	var lowerLeftCorner vec.Vector3D = origin.Sub(horizontal.FracScalar(2)).Sub(vertical.FracScalar(2)).Sub(vec.NewVector3D(0, 0, focalLength))
+	camera := cam.NewCamera()
 
 	// Render
 
@@ -114,17 +97,17 @@ func main() {
 		for i := 0; i < imageWidth; i++ {
 			var u, v float64
 
-			u = float64(i) / float64(imageWidth-1)
-			v = float64(j) / float64(imageHeight-1)
+			pixel := c.NewBlack()
 
-			var pixel vec.Vector3D
-			var ray vec.Ray = vec.Ray{
-				Orig: origin,
-				Dir:  lowerLeftCorner.Add(horizontal.MulScalar(u)).Add(vertical.MulScalar(v)).Sub(origin),
+			for s := 0; s < samplesPerPixel; s++ {
+				u = (float64(i) + ut.Rand()) / float64(imageWidth-1)
+				v = (float64(j) + ut.Rand()) / float64(imageHeight-1)
+
+				ray := camera.RayAt(u, v)
+				pixel = *pixel.Add(rayColor(&ray, &world))
 			}
 
-			pixel = rayColor(&ray, &world)
-			writePixel(file, pixel)
+			writePixel(file, &pixel, samplesPerPixel)
 		}
 	}
 

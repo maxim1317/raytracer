@@ -5,17 +5,18 @@ import (
 )
 
 type HitRecord struct {
-	P, Normal vec.Vector3D
+	P, Normal vec.Vec3
 	T         float64
 	FrontFace bool
 }
 
-func (h *HitRecord) SetFaceNormal(r *vec.Ray, outwardNormal vec.Vector3D) {
+func (h *HitRecord) SetFaceNormal(r *vec.Ray, outwardNormal *vec.Vec3) {
 	h.FrontFace = r.Dir.Dot(outwardNormal) < 0
 	if h.FrontFace {
-		h.Normal = outwardNormal
+		h.Normal = *outwardNormal
 	} else {
-		h.Normal = vec.NewZeroVector3D().Sub(outwardNormal)
+		zero := vec.NewZero()
+		h.Normal = *zero.Sub(outwardNormal)
 	}
 }
 
