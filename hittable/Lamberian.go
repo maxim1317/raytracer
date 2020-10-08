@@ -10,9 +10,9 @@ type Lambertian struct {
 	albedo t.Texture
 }
 
-func NewLambertianTextured(albedo *t.Texture) Lambertian {
+func NewLambertianTextured(albedo t.Texture) Lambertian {
 	l := new(Lambertian)
-	l.albedo = *albedo
+	l.albedo = albedo
 	return *l
 }
 

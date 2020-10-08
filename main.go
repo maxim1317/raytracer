@@ -31,8 +31,8 @@ const (
 	minAperture = 0.001
 
 	fov         = 20.0
-	aspectRatio = 16.0 / 9.0
-	width       = 1280
+	aspectRatio = 4.0 / 3.0
+	width       = 400
 	height      = int(width / aspectRatio)
 	samples     = 100
 	aperture    = 0.01

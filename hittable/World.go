@@ -2,6 +2,7 @@ package hittable
 
 import (
 	"github.com/maxim1317/raytracer/color"
+	"github.com/maxim1317/raytracer/hittable/texture"
 	"github.com/maxim1317/raytracer/utils"
 	"github.com/maxim1317/raytracer/vec"
 )
@@ -60,7 +61,15 @@ func (w *World) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
 func RandomWorld() *World {
 	world := new(World)
 
-	groundMaterial := NewLambertian(color.New(0.5, 0.5, 0.5))
+	// auto checker = make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+	// world.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(checker)));
+
+	groundMaterial := NewLambertianTextured(
+		texture.NewCheckerColored(
+			color.New(0.2, 0.3, 0.1),
+			color.New(0.9, 0.9, 0.9),
+		),
+	)
 	world.Add(NewSphere(vec.New(0, -1000, 0), 1000, groundMaterial))
 
 	for a := -6; a < 6; a++ {
@@ -74,7 +83,7 @@ func RandomWorld() *World {
 				case chooseMat < 0.6:
 					// diffuse
 					albedo := color.Rand().Mul(color.Rand())
-					sphereMaterial = NewLambertian(albedo)
+					sphereMaterial = NewLambertianColored(albedo)
 					center2 := center.Add(vec.New(0, utils.RandRange(0, 0.5), 0))
 					world.Add(
 						NewMovingSphere(
@@ -102,7 +111,7 @@ func RandomWorld() *World {
 	mat1 := NewDielectric(1.5)
 	world.Add(NewSphere(vec.New(0, 1, 0), 1.0, mat1))
 
-	mat2 := NewLambertian(color.New(0.4, 0.2, 0.6))
+	mat2 := NewLambertianColored(color.New(0.4, 0.2, 0.6))
 	world.Add(NewSphere(vec.New(-4, 1, 0), 1.0, mat2))
 
 	mat3 := NewMetal(color.New(0.7, 0.6, 0.5), 0.0)
