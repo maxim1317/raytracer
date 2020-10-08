@@ -119,3 +119,16 @@ func RandomWorld() *World {
 
 	return world
 }
+
+func TwoSphereWorld() *World {
+	world := new(World)
+	pertext := texture.NewNoiseTexture(4)
+	imgtext := texture.NewImageTexture("world.jpg")
+
+	t1 := NewLambertianTextured(pertext)
+	t2 := NewLambertianTextured(imgtext)
+	world.Add(NewSphere(vec.New(0, -1000, 0), 1000, t1))
+	world.Add(NewSphere(vec.New(0, 2, 0), 2, t2))
+
+	return world
+}

@@ -66,13 +66,13 @@ var (
 )
 
 func main() {
-	cpus = runtime.NumCPU() * 2
+	cpus = runtime.NumCPU()
 
 	start := time.Now()
 
 	// World
 
-	world := h.RandomWorld()
+	world := h.TwoSphereWorld()
 
 	// Camera
 
