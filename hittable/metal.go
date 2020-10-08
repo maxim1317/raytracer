@@ -22,8 +22,8 @@ func NewMetal(albedo *c.Color, fuzz float64) Metal {
 }
 
 func (m Metal) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scattered *vec.Ray) (bool, *vec.Ray, *c.Color) {
-	reflected := Reflect(rIn.Dir, rec.Normal)
-	scattered = vec.NewRay(rec.P, reflected.Add(vec.NewRandInUnitSphere().MulScalar(m.fuzz)))
+	reflected := Reflect(rIn.Direction(), rec.Normal)
+	scattered = vec.NewRay(rec.P, reflected.Add(vec.NewRandInUnitSphere().MulScalar(m.fuzz)), rIn.Time())
 	attenuation = m.albedo
-	return scattered.Dir.Dot(rec.Normal) > 0, scattered, attenuation
+	return scattered.Direction().Dot(rec.Normal) > 0, scattered, attenuation
 }

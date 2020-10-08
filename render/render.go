@@ -19,7 +19,7 @@ const (
 )
 
 func getPixelColor(r *vec.Ray, world *h.World, depth int) *c.Color {
-	if r.Dir == nil {
+	if r.Direction() == nil {
 		fmt.Printf("%v", depth)
 	}
 	if depth <= 0 {
@@ -37,7 +37,7 @@ func getPixelColor(r *vec.Ray, world *h.World, depth int) *c.Color {
 		return c.Black()
 	}
 
-	unitDir := r.Dir.GetNormal()
+	unitDir := r.Direction().GetNormal()
 	t := 0.5 * (unitDir.Y() + 1.0)
 	unit := vec.NewUnit()
 	blue := vec.New(0.5, 0.7, 1.0)
@@ -52,7 +52,7 @@ func sample(world *h.World, camera *cam.Camera, samples, width, height, i, j int
 		u := (float64(i) + utils.Rand()) / float64(width)
 		v := (float64(j) + utils.Rand()) / float64(height)
 
-		ray := camera.RayAt(u, v)
+		ray := camera.GetRay(u, v)
 		rgb = rgb.Add(getPixelColor(ray, world, maxDepth))
 	}
 

@@ -12,7 +12,7 @@ type HitRecord struct {
 }
 
 func (h *HitRecord) SetFaceNormal(r *vec.Ray, outwardNormal *vec.Vec3) {
-	h.FrontFace = r.Dir.Dot(outwardNormal) < 0
+	h.FrontFace = r.Direction().Dot(outwardNormal) < 0
 	if h.FrontFace {
 		h.Normal = outwardNormal
 	} else {

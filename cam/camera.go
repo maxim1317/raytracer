@@ -7,15 +7,19 @@ import (
 	"github.com/maxim1317/raytracer/vec"
 )
 
+// Camera provides simple camera type
 type Camera struct {
 	lowerLeft, horizontal, vertical, origin *vec.Vec3
 	u, v, w                                 *vec.Vec3
 	lensRadius                              float64
+	shutterOpenTime, shutterCloseTime       float64
 }
 
+// NewCamera creates new camera
 func NewCamera(
 	lookFrom, lookAt, vUp *vec.Vec3,
 	vFOV, aspectRatio, aperture, focusDist float64,
+	shutterOpenTime, shutterCloseTime float64,
 ) *Camera {
 	c := new(Camera)
 
@@ -37,14 +41,21 @@ func NewCamera(
 
 	c.lensRadius = aperture / 2.0
 
+	c.shutterOpenTime = shutterOpenTime
+	c.shutterCloseTime = shutterCloseTime
 	return c
 }
 
-func (c *Camera) RayAt(s, t float64) *vec.Ray {
+// GetRay returns ray
+func (c *Camera) GetRay(s, t float64) *vec.Ray {
 	var rd, offset *vec.Vec3
 
 	rd = vec.NewRandInUnitDisk().MulScalar(c.lensRadius)
 	offset = c.u.MulScalar(rd.X()).Add(c.v.MulScalar(rd.Y()))
 
-	return vec.NewRay(c.origin.Add(offset), c.lowerLeft.Add(c.horizontal.MulScalar(s)).Add(c.vertical.MulScalar(t)).Sub(c.origin))
+	return vec.NewRay(
+		c.origin.Add(offset),
+		c.lowerLeft.Add(c.horizontal.MulScalar(s)).Add(c.vertical.MulScalar(t)).Sub(c.origin),
+		utils.RandRange(c.shutterOpenTime, c.shutterCloseTime),
+	)
 }

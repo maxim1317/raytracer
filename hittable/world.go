@@ -47,11 +47,18 @@ func RandomWorld() *World {
 			if (center.Sub(vec.New(4, 0.2, 0))).Length() > 0.9 {
 				var sphereMaterial Material
 				switch {
-				case chooseMat < 0.8:
+				case chooseMat < 0.6:
 					// diffuse
 					albedo := color.Rand().Mul(color.Rand())
 					sphereMaterial = NewLambertian(albedo)
-					world.Add(NewSphere(center, 0.2, sphereMaterial))
+					center2 := center.Add(vec.New(0, utils.RandRange(0, 0.5), 0))
+					world.Add(
+						NewMovingSphere(
+							center, center2,
+							0.0, 1.0, 0.2,
+							sphereMaterial,
+						),
+					)
 				case chooseMat < 0.95:
 					// metal
 					albedo := color.RandInRange(0.5, 1)

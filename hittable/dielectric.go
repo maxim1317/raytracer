@@ -36,7 +36,7 @@ func (d Dielectric) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, 
 		refractionRatio = d.ir
 	}
 
-	unitDirection := rIn.Dir.GetNormal()
+	unitDirection := rIn.Direction().GetNormal()
 	cosTheta := math.Min(vec.NewZero().Sub(unitDirection).Dot(rec.Normal), 1.0)
 	sinTheta := math.Sqrt(1.0 - cosTheta*cosTheta)
 
@@ -48,6 +48,6 @@ func (d Dielectric) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, 
 		direction = Refract(unitDirection, rec.Normal, refractionRatio)
 	}
 
-	scattered = vec.NewRay(rec.P, direction)
+	scattered = vec.NewRay(rec.P, direction, rIn.Time())
 	return true, scattered, attenuation
 }
