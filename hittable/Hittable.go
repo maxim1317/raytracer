@@ -23,4 +23,5 @@ func (h *HitRecord) SetFaceNormal(r *vec.Ray, outwardNormal *vec.Vec3) {
 
 type Hittable interface {
 	Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool
+	BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB)
 }

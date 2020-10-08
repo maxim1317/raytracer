@@ -13,6 +13,18 @@ type MovingSphere struct {
 	mat              Material
 }
 
+func (s *MovingSphere) Center(time float64) *vec.Vec3 {
+	return s.center0.Add((s.center1.Sub(s.center0)).MulScalar((time - s.time0) / (s.time1 - s.time0)))
+}
+
+func (s *MovingSphere) Radius() float64 {
+	return s.radius
+}
+
+func (s *MovingSphere) Mat() Material {
+	return s.mat
+}
+
 func NewMovingSphere(
 	center0, center1 *vec.Vec3,
 	time0, time1 float64,
@@ -27,10 +39,6 @@ func NewMovingSphere(
 		radius:  radius,
 		mat:     mat,
 	}
-}
-
-func (s *MovingSphere) Center(time float64) *vec.Vec3 {
-	return s.center0.Add((s.center1.Sub(s.center0)).MulScalar((time - s.time0) / (s.time1 - s.time0)))
 }
 
 func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
@@ -71,4 +79,17 @@ func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool 
 	}
 
 	return false
+}
+
+func (s *MovingSphere) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
+	box0 := NewAABB(
+		s.Center(t0).Sub(vec.New(s.Radius(), s.Radius(), s.Radius())),
+		s.Center(t0).Add(vec.New(s.Radius(), s.Radius(), s.Radius())),
+	)
+	box1 := NewAABB(
+		s.Center(t1).Sub(vec.New(s.Radius(), s.Radius(), s.Radius())),
+		s.Center(t1).Add(vec.New(s.Radius(), s.Radius(), s.Radius())),
+	)
+	outputBox = SurroundingBox(box0, box1)
+	return true, outputBox
 }

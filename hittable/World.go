@@ -33,6 +33,30 @@ func (w *World) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 	return hitAnything
 }
 
+func (w *World) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
+	if w.Count() == 0 {
+		return false, outputBox
+	}
+
+	tempBox := new(AABB)
+	firstBox := true
+	var bFlag bool
+
+	for _, element := range w.elements {
+		bFlag, tempBox = (*element).BoundingBox(t0, t1, tempBox)
+		if !bFlag {
+			return false, outputBox
+		}
+		if firstBox {
+			outputBox = tempBox
+		} else {
+			outputBox = SurroundingBox(outputBox, tempBox)
+		}
+	}
+
+	return true, outputBox
+}
+
 func RandomWorld() *World {
 	world := new(World)
 

@@ -10,13 +10,14 @@ func Rand() float64 {
 }
 
 func RandRange(a, b float64) float64 {
-	var c float64
 	if b < a {
-		c = b
-		b = a
-		a = c
+		a, b = b, a
 	}
 	return a + (b-a)*rand.Float64()
+}
+
+func RandInt(a, b int) int {
+	return int(RandRange(float64(a), float64(b)))
 }
 
 func Degrees2Rad(alpha float64) float64 {
