@@ -9,6 +9,12 @@ type SolidColor struct {
 	color *color.Color
 }
 
+func NewSolidColor(c *color.Color) *SolidColor {
+	return &SolidColor{
+		color: c,
+	}
+}
+
 func (s *SolidColor) Value(u, v float64, p *vec.Vec3) *color.Color {
 	return s.color
 }

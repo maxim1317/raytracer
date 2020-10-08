@@ -32,6 +32,14 @@ func (s *Sphere) Mat() Material {
 	return s.mat
 }
 
+func GetSphereUV(p *vec.Vec3, u, v float64) (float64, float64) {
+	phi := math.Atan2(p.Z(), p.X())
+	theta := math.Asin(p.Y())
+	u = 1 - (phi+math.Pi)/(2*math.Pi)
+	v = (theta + math.Pi/2) / math.Pi
+	return u, v
+}
+
 func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 
 	// t^2*b*b + 2*t*b*(A−C) + (A−C)*(A−C) − r^2 = 0
@@ -54,6 +62,7 @@ func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center()).DivScalar(s.Radius())
 			rec.SetFaceNormal(r, outwardNormal)
+			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center()).DivScalar(s.Radius())), rec.U, rec.V)
 			rec.Mat = s.Mat()
 			return true
 		}
@@ -64,6 +73,7 @@ func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center()).DivScalar(s.Radius())
 			rec.SetFaceNormal(r, outwardNormal)
+			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center()).DivScalar(s.Radius())), rec.U, rec.V)
 			rec.Mat = s.Mat()
 			return true
 		}

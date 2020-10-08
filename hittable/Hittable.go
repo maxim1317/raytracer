@@ -6,7 +6,7 @@ import (
 
 type HitRecord struct {
 	P, Normal *vec.Vec3
-	T         float64
+	T, U, V   float64
 	Mat       Material
 	FrontFace bool
 }
