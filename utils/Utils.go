@@ -23,3 +23,7 @@ func RandInt(a, b int) int {
 func Degrees2Rad(alpha float64) float64 {
 	return alpha * math.Pi / 180.0
 }
+
+func Clamp(src, min, max float64) float64 {
+	return math.Max(math.Min(src, max), min)
+}
