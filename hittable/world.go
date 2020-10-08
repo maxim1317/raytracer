@@ -39,8 +39,8 @@ func RandomWorld() *World {
 	groundMaterial := NewLambertian(color.New(0.5, 0.5, 0.5))
 	world.Add(NewSphere(vec.New(0, -1000, 0), 1000, groundMaterial))
 
-	for a := -11; a < 11; a++ {
-		for b := -11; b < 11; b++ {
+	for a := -6; a < 6; a++ {
+		for b := -6; b < 6; b++ {
 			chooseMat := utils.Rand()
 			center := vec.New(float64(a)+0.9*utils.Rand(), 0.2, float64(b)+0.9*utils.Rand())
 
@@ -71,7 +71,7 @@ func RandomWorld() *World {
 	mat1 := NewDielectric(1.5)
 	world.Add(NewSphere(vec.New(0, 1, 0), 1.0, mat1))
 
-	mat2 := NewLambertian(color.New(0.4, 0.2, 0.1))
+	mat2 := NewLambertian(color.New(0.4, 0.2, 0.6))
 	world.Add(NewSphere(vec.New(-4, 1, 0), 1.0, mat2))
 
 	mat3 := NewMetal(color.New(0.7, 0.6, 0.5), 0.0)

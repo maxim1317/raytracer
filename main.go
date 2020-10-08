@@ -30,12 +30,12 @@ const (
 	minSamples  = 1
 	minAperture = 0.001
 
-	fov         = 30.0
-	width       = 800
-	height      = 600
-	samples     = 100
-	aperture    = 0.1
-	distToFocus = 10.0
+	fov         = 25.0
+	width       = 1920
+	height      = 1080
+	samples     = 200
+	aperture    = 0.01
+	distToFocus = 11.0
 
 	progressBarWidth = 80
 )
@@ -59,8 +59,8 @@ var (
 		".jpeg": jpegType,
 	}
 
-	lookFrom *vec.Vec3 = vec.New(13, 3, 2)
-	lookAt   *vec.Vec3 = vec.New(0, 0, 0)
+	lookFrom *vec.Vec3 = vec.New(10, 1.5, 4.5)
+	lookAt   *vec.Vec3 = vec.New(0, 0.5, 0)
 	vUp      *vec.Vec3 = vec.New(0, 1, 0)
 )
 
