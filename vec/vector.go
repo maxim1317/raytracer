@@ -6,31 +6,37 @@ import (
 	ut "github.com/maxim1317/raytracer/utils"
 )
 
-// Vec3 type: basic 3D vector
+// Vec3 structure provides basic 3D vector
 type Vec3 struct {
 	x, y, z float64
 }
 
+// X getter
 func (v *Vec3) X() float64 {
 	return v.x
 }
 
+// Y getter
 func (v *Vec3) Y() float64 {
 	return v.y
 }
 
+// Z getter
 func (v *Vec3) Z() float64 {
 	return v.z
 }
 
+// LengthSquared returns vector squared length
 func (v *Vec3) LengthSquared() float64 {
 	return v.x*v.x + v.y*v.y + v.z*v.z
 }
 
+// Length returns vector length
 func (v *Vec3) Length() float64 {
 	return math.Sqrt(v.LengthSquared())
 }
 
+// MulScalar multiplies vector by scalar
 func (v *Vec3) MulScalar(s float64) *Vec3 {
 	newV := new(Vec3)
 	newV.x = v.x * s
@@ -39,10 +45,12 @@ func (v *Vec3) MulScalar(s float64) *Vec3 {
 	return newV
 }
 
+// DivScalar divides vector by scalar
 func (v *Vec3) DivScalar(s float64) *Vec3 {
 	return v.MulScalar(1 / s)
 }
 
+// Add adds another vector to the vector
 func (v *Vec3) Add(v2 *Vec3) *Vec3 {
 	newV := new(Vec3)
 	newV.x = v.x + v2.x
@@ -51,6 +59,7 @@ func (v *Vec3) Add(v2 *Vec3) *Vec3 {
 	return newV
 }
 
+// Sub substracts another vector from the vector
 func (v *Vec3) Sub(v2 *Vec3) *Vec3 {
 	newV := new(Vec3)
 	newV.x = v.x - v2.x
@@ -59,10 +68,12 @@ func (v *Vec3) Sub(v2 *Vec3) *Vec3 {
 	return newV
 }
 
+// Dot returns dot product of two vectors
 func (v *Vec3) Dot(v2 *Vec3) float64 {
 	return v.x*v2.x + v.y*v2.y + v.z*v2.z
 }
 
+// Cross returns cross product of two vectors
 func (v *Vec3) Cross(v2 *Vec3) *Vec3 {
 	newV := new(Vec3)
 	newV.x = v.y*v2.z - v.z*v2.y
@@ -71,11 +82,12 @@ func (v *Vec3) Cross(v2 *Vec3) *Vec3 {
 	return newV
 }
 
+// GetNormal returns unit vector
 func (v Vec3) GetNormal() *Vec3 {
 	return v.DivScalar(v.Length())
 }
 
-// New func: create new Vec3
+// New creates new Vec3
 func New(x, y, z float64) *Vec3 {
 	vec := new(Vec3)
 	vec.x = x
@@ -84,6 +96,7 @@ func New(x, y, z float64) *Vec3 {
 	return vec
 }
 
+// NewZero creates new zeroed Vec3
 func NewZero() *Vec3 {
 	vec := new(Vec3)
 	vec.x = 0
@@ -92,6 +105,7 @@ func NewZero() *Vec3 {
 	return vec
 }
 
+// NewUnit creates new unit Vec3
 func NewUnit() *Vec3 {
 	vec := new(Vec3)
 	vec.x = 1
@@ -100,6 +114,7 @@ func NewUnit() *Vec3 {
 	return vec
 }
 
+// NewRand creates new random Vec3
 func NewRand() *Vec3 {
 	vec := new(Vec3)
 	vec.x = ut.Rand()
@@ -108,6 +123,7 @@ func NewRand() *Vec3 {
 	return vec
 }
 
+// NewRandInRange creates new random Vec3
 func NewRandInRange(a, b float64) *Vec3 {
 	vec := new(Vec3)
 	vec.x = ut.RandRange(a, b)
@@ -116,6 +132,7 @@ func NewRandInRange(a, b float64) *Vec3 {
 	return vec
 }
 
+// NewRandInUnitSphere creates new random Vec3 in unit sphere
 func NewRandInUnitSphere() *Vec3 {
 	for {
 		p := NewRandInRange(-1.0, 1.0)
@@ -126,6 +143,7 @@ func NewRandInUnitSphere() *Vec3 {
 	}
 }
 
+// NewRandInUnitDisk creates new random Vec3 in unit disk
 func NewRandInUnitDisk() *Vec3 {
 	for {
 		p := New(
@@ -140,6 +158,7 @@ func NewRandInUnitDisk() *Vec3 {
 	}
 }
 
+// NewRandUnit creates new random unit Vec3
 func NewRandUnit() *Vec3 {
 	v := new(Vec3)
 	a := ut.RandRange(0, 2*math.Pi)
@@ -152,6 +171,7 @@ func NewRandUnit() *Vec3 {
 	return v
 }
 
+// Clip returns clipped vector
 func (v *Vec3) Clip(min, max float64) *Vec3 {
 	newV := new(Vec3)
 	switch {
