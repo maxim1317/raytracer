@@ -19,19 +19,19 @@ func (w *World) Count() int {
 	return len(w.elements)
 }
 
-func (w *World) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
+func (w *World) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
 	hitAnything := false
 	closest := tMax
 
 	for _, element := range w.elements {
-		hit := (*element).Hit(r, tMin, closest, rec)
+		hit, rec := (*element).Hit(r, tMin, closest, rec)
 
 		if hit {
 			hitAnything = true
 			closest = rec.T
 		}
 	}
-	return hitAnything
+	return hitAnything, rec
 }
 
 func (w *World) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
@@ -58,11 +58,11 @@ func (w *World) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
 	return true, outputBox
 }
 
-func RandomWorld() *World {
+func NewRandomWorld() *World {
 	world := new(World)
 
 	// auto checker = make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
-	// world.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(checker)));
+	// world.add(make_shared<sphere>(point3(0,-1000,0), 1000, NewLambertianColored(checker)));
 
 	groundMaterial := NewLambertianTextured(
 		texture.NewCheckerColored(
@@ -120,8 +120,9 @@ func RandomWorld() *World {
 	return world
 }
 
-func TwoSphereWorld() *World {
+func NewTwoSphereWorld() *World {
 	world := new(World)
+
 	pertext := texture.NewNoiseTexture(4)
 	imgtext := texture.NewImageTexture("world.jpg")
 
@@ -129,6 +130,43 @@ func TwoSphereWorld() *World {
 	t2 := NewLambertianTextured(imgtext)
 	world.Add(NewSphere(vec.New(0, -1000, 0), 1000, t1))
 	world.Add(NewSphere(vec.New(0, 2, 0), 2, t2))
+
+	return world
+}
+
+func NewSimpleLightWorld() *World {
+	world := new(World)
+
+	pertext := texture.NewNoiseTexture(4)
+	imgtext := texture.NewImageTexture("world.jpg")
+
+	t1 := NewLambertianTextured(pertext)
+	t2 := NewLambertianTextured(imgtext)
+	world.Add(NewSphere(vec.New(0, -1000, 0), 1000, t1))
+	world.Add(NewSphere(vec.New(0, 2, 0), 2, t2))
+
+	difflight := NewDiffuseLightColored(color.New(0, 0, 4))
+	difflight2 := NewDiffuseLightColored(color.New(4, 0, 0))
+	world.Add(NewXYRect(3, 5, 1, 3, -2, difflight))
+	world.Add(NewSphere(vec.New(0, 7, 0), 1, difflight2))
+
+	return world
+}
+
+func NewCornellBox() *World {
+	world := new(World)
+
+	red := NewLambertianColored(color.New(0.65, 0.05, 0.05))
+	white := NewLambertianColored(color.New(0.73, 0.73, 0.73))
+	green := NewLambertianColored(color.New(0.12, 0.45, 0.15))
+	light := NewDiffuseLightColored(color.New(15, 15, 15))
+
+	world.Add(NewYZRect(0, 555, 0, 555, 555, green))
+	world.Add(NewYZRect(0, 555, 0, 555, 0, red))
+	world.Add(NewXZRect(213, 343, 227, 332, 554, light))
+	world.Add(NewXZRect(0, 555, 0, 555, 0, white))
+	world.Add(NewXZRect(0, 555, 0, 555, 555, white))
+	world.Add(NewXYRect(0, 555, 0, 555, 555, white))
 
 	return world
 }

@@ -31,11 +31,6 @@ const (
 	minSamples  = 1
 	minAperture = 0.001
 
-	aspectRatio = 4.0 / 3.0
-	width       = 400
-	height      = int(width / aspectRatio)
-	samples     = 100
-
 	progressBarWidth = 80
 )
 
@@ -58,12 +53,16 @@ var (
 		".jpeg": jpegType,
 	}
 
-	lookFrom    *vec.Vec3 = vec.New(13, 2, 3)
-	lookAt      *vec.Vec3 = vec.New(0, 0, 0)
+	lookfrom    *vec.Vec3 = vec.New(13, 2, 3)
+	lookat      *vec.Vec3 = vec.New(0, 0, 0)
 	vUp         *vec.Vec3 = vec.New(0, 1, 0)
-	vFov        float64   = 40.0
-	aperture    float64   = 0.0
+	vfov        float64   = 40.0
+	aperture    float64   = 0.01
 	distToFocus float64   = 10.0
+	samples     int       = 100
+
+	aspectRatio = 4.0 / 3.0
+	width       = 400
 )
 
 func main() {
@@ -76,37 +75,53 @@ func main() {
 	var world *hittable.World
 	background := color.Black()
 
-	switch 1 {
+	switch 4 {
 	case 1:
-		world = hittable.RandomWorld()
+		world = hittable.NewRandomWorld()
 		background = color.New(0.70, 0.80, 1.00)
-		lookFrom = vec.New(13, 2, 3)
-		lookAt = vec.New(0, 0, 0)
-		vFov = 20.0
+		lookfrom = vec.New(13, 2, 3)
+		lookat = vec.New(0, 0, 0)
+		vfov = 20.0
 		aperture = 0.1
 	case 2:
-		world = hittable.TwoSphereWorld()
+		world = hittable.NewTwoSphereWorld()
 		background = color.New(0.70, 0.80, 1.00)
-		lookFrom = vec.New(13, 2, 3)
-		lookAt = vec.New(0, 0, 0)
-		vFov = 20.0
+		lookfrom = vec.New(13, 2, 3)
+		lookat = vec.New(0, 0, 0)
+		vfov = 20.0
 	case 3:
-		background = color.New(0.0, 0.0, 0.0)
+		world = hittable.NewSimpleLightWorld()
+		background = color.Black()
+		lookfrom = vec.New(26, 3, 6)
+		lookat = vec.New(0, 2, 0)
+		samples = 400
+		vfov = 20.0
+	case 4:
+		world = hittable.NewCornellBox()
+		width = 600
+		aspectRatio = 1.0
+		samples = 50
+		background = color.Black()
+		lookfrom = vec.New(278, 278, -800)
+		lookat = vec.New(278, 278, 0)
+		vfov = 40.0
 	}
 
 	// Camera
 
 	camera := cam.NewCamera(
-		lookFrom, lookAt, vUp,
-		vFov, float64(width)/float64(height),
+		lookfrom, lookat, vUp,
+		vfov, aspectRatio,
 		aperture, distToFocus,
 		0.0, 1.0,
 	)
 
 	// Render
 
+	height := int(float64(width) / aspectRatio)
+
 	fmt.Printf("\nRendering %d x %d pixel scene with %d objects:", width, height, world.Count())
-	fmt.Printf("\n[%d cpus, %d samples/pixel, %.2f° vFov, %.2f aperture]", cpus, samples, vFov, aperture)
+	fmt.Printf("\n[%d cpus, %d samples/pixel, %.2f° vfov, %.2f aperture]", cpus, samples, vfov, aperture)
 
 	ch := make(chan int, height)
 	defer close(ch)

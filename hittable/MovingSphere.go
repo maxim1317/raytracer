@@ -41,7 +41,7 @@ func NewMovingSphere(
 	}
 }
 
-func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
+func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
 
 	// t^2*b*b + 2*t*b*(A−C) + (A−C)*(A−C) − r^2 = 0
 
@@ -64,7 +64,7 @@ func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool 
 			outwardNormal := rec.P.Sub(s.Center(r.Time())).DivScalar(s.radius)
 			rec.SetFaceNormal(r, outwardNormal)
 			rec.Mat = s.mat
-			return true
+			return true, rec
 		}
 
 		temp = (-halfb + root) / a
@@ -74,11 +74,11 @@ func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool 
 			outwardNormal := rec.P.Sub(s.Center(r.Time())).DivScalar(s.radius)
 			rec.SetFaceNormal(r, outwardNormal)
 			rec.Mat = s.mat
-			return true
+			return true, rec
 		}
 	}
 
-	return false
+	return false, rec
 }
 
 func (s *MovingSphere) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {

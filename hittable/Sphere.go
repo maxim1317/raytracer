@@ -40,7 +40,7 @@ func GetSphereUV(p *vec.Vec3, u, v float64) (float64, float64) {
 	return u, v
 }
 
-func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
+func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
 
 	// t^2*b*b + 2*t*b*(A−C) + (A−C)*(A−C) − r^2 = 0
 
@@ -64,7 +64,7 @@ func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.SetFaceNormal(r, outwardNormal)
 			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center()).DivScalar(s.Radius())), rec.U, rec.V)
 			rec.Mat = s.Mat()
-			return true
+			return true, rec
 		}
 
 		temp = (-halfb + root) / a
@@ -75,11 +75,11 @@ func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.SetFaceNormal(r, outwardNormal)
 			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center()).DivScalar(s.Radius())), rec.U, rec.V)
 			rec.Mat = s.Mat()
-			return true
+			return true, rec
 		}
 	}
 
-	return false
+	return false, rec
 }
 
 func (s *Sphere) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {

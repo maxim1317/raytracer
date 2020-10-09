@@ -24,7 +24,9 @@ func getPixelColor(r *vec.Ray, background *c.Color, world *h.World, depth int) *
 		return c.Black()
 	}
 
-	if !(*world).Hit(r, 0.001, math.MaxFloat64, rec) {
+	hit, rec := (*world).Hit(r, 0.001, math.MaxFloat64, rec)
+
+	if !hit {
 		return background
 	}
 
@@ -52,7 +54,7 @@ func sample(world *h.World, camera *cam.Camera, background *c.Color, samples, wi
 	}
 
 	// average
-	return rgb.DivScalar(float64(samples))
+	return rgb.DivScalar(float64(samples)).Gamma2().Clip(0.0, 1.0)
 }
 
 // Do performs the render, sampling each pixel the provided number of times
