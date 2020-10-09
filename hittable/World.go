@@ -8,11 +8,11 @@ import (
 )
 
 type World struct {
-	elements []*Hittable
+	elements []Hittable
 }
 
 func (w *World) Add(h Hittable) {
-	w.elements = append(w.elements, &h)
+	w.elements = append(w.elements, h)
 }
 
 func (w *World) Count() int {
@@ -24,7 +24,7 @@ func (w *World) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecor
 	closest := t1
 
 	for _, element := range w.elements {
-		hit, rec := (*element).Hit(r, t0, closest, rec)
+		hit, rec := element.Hit(r, t0, closest, rec)
 
 		if hit {
 			hitAnything = true
@@ -44,7 +44,7 @@ func (w *World) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
 	var bFlag bool
 
 	for _, element := range w.elements {
-		bFlag, tempBox = (*element).BoundingBox(t0, t1, tempBox)
+		bFlag, tempBox = element.BoundingBox(t0, t1, tempBox)
 		if !bFlag {
 			return false, outputBox
 		}
@@ -153,6 +153,37 @@ func NewSimpleLightWorld() *World {
 	return world
 }
 
+func NewTwoBoxWorld() *World {
+	world := new(World)
+
+	red := NewLambertianColored(color.New(0.65, 0.05, 0.05))
+	// white := NewLambertianColored(color.New(0.73, 0.73, 0.73))
+	// green := NewLambertianColored(color.New(0.12, 0.45, 0.15))
+	// blue := NewLambertianColored(color.New(0.5, 0.05, 0.65))
+	// light := NewDiffuseLightColored(color.New(15, 15, 15))
+
+	// var box1 Hittable
+	var box2 Hittable
+
+	world.Add(NewXZRect(-100, 100, -100, 100, 0, red))
+
+	// box1 = NewBox(vec.New(-2, 0, -2), vec.New(0, 2, 0), green)
+	// box1 = NewRotateY(box1, 45)
+	// box1 = NewTranslate(box1, vec.New(0, 1, 0))
+
+	// box2 = NewBox(vec.New(-2, 0, 0), vec.New(0, 2, 2), blue)
+	// world.Add(box2)
+	imgtext := texture.NewImageTexture("world.jpg")
+	t2 := NewLambertianTextured(imgtext)
+	box2 = NewSphere(vec.New(-1, 1, 1), 1, t2)
+	box2 = NewRotateY(box2, -60)
+	box2 = NewTranslate(box2, vec.New(0, 1, 0))
+	// world.Add(box1)
+	world.Add(box2)
+
+	return world
+}
+
 func NewCornellBox() *World {
 	world := new(World)
 
@@ -168,8 +199,18 @@ func NewCornellBox() *World {
 	world.Add(NewXZRect(0, 555, 0, 555, 555, white))
 	world.Add(NewXYRect(0, 555, 0, 555, 555, white))
 
-	world.Add(NewBox(vec.New(130, 0, 65), vec.New(295, 165, 230), white))
-	world.Add(NewBox(vec.New(265, 0, 295), vec.New(430, 330, 460), white))
+	// var box1 Hittable
+	// var box2 Hittable
+
+	box1 := NewBox(vec.NewZero(), vec.New(165, 330, 165), white)
+	box1Rotated := NewRotateY(box1, 18)
+	box1RotatedTranslated := NewTranslate(box1Rotated, vec.New(265, 0, 295))
+	world.Add(box1RotatedTranslated)
+
+	box2 := NewBox(vec.NewZero(), vec.New(165, 165, 165), red)
+	box2Rotated := NewRotateY(box2, -18)
+	box2Translated := NewTranslate(box2Rotated, vec.New(130, 0, 65))
+	world.Add(box2Translated)
 
 	return world
 }

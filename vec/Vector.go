@@ -31,6 +31,11 @@ func (v *Vec3) Ind(i int) float64 {
 	return v.vec[i]
 }
 
+// SetInd setter
+func (v *Vec3) SetInd(i int, value float64) {
+	v.vec[i] = value
+}
+
 // LengthSquared returns vector squared length
 func (v *Vec3) LengthSquared() float64 {
 	return v.X()*v.X() + v.Y()*v.Y() + v.Z()*v.Z()
@@ -110,6 +115,18 @@ func New(x, y, z float64) *Vec3 {
 	vec[0] = x
 	vec[1] = y
 	vec[2] = z
+
+	return &Vec3{
+		vec: vec,
+	}
+}
+
+// Copy creates Vec3
+func (v *Vec3) Copy() *Vec3 {
+	var vec [3]float64
+	vec[0] = v.X()
+	vec[1] = v.Y()
+	vec[2] = v.Z()
 
 	return &Vec3{
 		vec: vec,

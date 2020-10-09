@@ -75,7 +75,7 @@ func main() {
 	var world *hittable.World
 	background := color.Black()
 
-	switch 4 {
+	switch 5 {
 	case 1:
 		world = hittable.NewRandomWorld()
 		background = color.New(0.70, 0.80, 1.00)
@@ -100,11 +100,19 @@ func main() {
 		world = hittable.NewCornellBox()
 		width = 600
 		aspectRatio = 1.0
-		samples = 50
+		samples = 10
 		background = color.Black()
 		lookfrom = vec.New(278, 278, -800)
 		lookat = vec.New(278, 278, 0)
 		vfov = 40.0
+	case 5:
+		world = hittable.NewTwoBoxWorld()
+		background = color.New(0.70, 0.80, 1.00)
+		lookfrom = vec.New(13, 3, 0)
+		lookat = vec.New(0, 2, 0)
+		aspectRatio = 1.0
+		samples = 10
+		vfov = 20.0
 	}
 
 	// Camera

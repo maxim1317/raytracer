@@ -11,11 +11,11 @@ type AABB struct {
 }
 
 func (b *AABB) Max() *vec.Vec3 {
-	return b.Max()
+	return b.max
 }
 
 func (b *AABB) Min() *vec.Vec3 {
-	return b.Min()
+	return b.min
 }
 
 func NewAABB(min, max *vec.Vec3) *AABB {
@@ -25,17 +25,16 @@ func NewAABB(min, max *vec.Vec3) *AABB {
 	}
 }
 
-func (b *AABB) Hit(r *vec.Ray, t0, t1 float64) bool {
+func (b AABB) Hit(r *vec.Ray, t0, t1 float64) bool {
 	for i := 0; i < 3; i++ {
-		var t0, t1, invD float64
-		invD = 1.0 / r.Direction().X()
-		t0 = (b.Min().Ind(i) - r.Origin().Ind(i)) * invD
-		t1 = (b.Max().Ind(i) - r.Origin().Ind(i)) * invD
+		invD := 1.0 / r.Direction().X()
+		tMin := (b.Min().Ind(i) - r.Origin().Ind(i)) * invD
+		tMax := (b.Max().Ind(i) - r.Origin().Ind(i)) * invD
 		if invD < 0.0 {
 			t0, t1 = t1, t0
 		}
-		t0 = math.Max(t0, t0)
-		t1 = math.Min(t1, t1)
+		t0 = math.Max(tMin, t0)
+		t1 = math.Min(tMax, t1)
 		if t1 <= t0 {
 			return false
 		}

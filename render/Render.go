@@ -14,7 +14,7 @@ import (
 
 const (
 	maxDepth = 50
-	t0     = 0.001
+	t0       = 0.001
 )
 
 func getPixelColor(r *vec.Ray, background *c.Color, world *h.World, depth int) *c.Color {
