@@ -27,3 +27,7 @@ func (m Metal) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, scatt
 	attenuation = m.albedo
 	return scattered.Direction().Dot(rec.Normal) > 0, scattered, attenuation
 }
+
+func (m Metal) Emitted(u, v float64, p *vec.Vec3) *c.Color {
+	return c.Black()
+}

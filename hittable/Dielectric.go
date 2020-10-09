@@ -51,3 +51,7 @@ func (d Dielectric) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, 
 	scattered = vec.NewRay(rec.P, direction, rIn.Time())
 	return true, scattered, attenuation
 }
+
+func (d Dielectric) Emitted(u, v float64, p *vec.Vec3) *c.Color {
+	return c.Black()
+}

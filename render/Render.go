@@ -1,7 +1,6 @@
 package render
 
 import (
-	"fmt"
 	"image"
 	"math"
 	"sync"
@@ -18,34 +17,30 @@ const (
 	tMin     = 0.001
 )
 
-func getPixelColor(r *vec.Ray, world *h.World, depth int) *c.Color {
-	if r.Direction() == nil {
-		fmt.Printf("%v", depth)
-	}
+func getPixelColor(r *vec.Ray, background *c.Color, world *h.World, depth int) *c.Color {
+	var rec *h.HitRecord = new(h.HitRecord)
+
 	if depth <= 0 {
 		return c.Black()
 	}
-	color := new(c.Color)
-	var rec *h.HitRecord = &h.HitRecord{}
-	if (*world).Hit(r, 0.001, math.MaxFloat64, rec) {
-		scattered := new(vec.Ray)
-		attenuation := c.Black()
-		isScut, scattered, attenuation := rec.Mat.Scatter(r, rec, attenuation, scattered)
-		if isScut {
-			return attenuation.Mul(getPixelColor(scattered, world, depth-1))
-		}
-		return c.Black()
+
+	if !(*world).Hit(r, 0.001, math.MaxFloat64, rec) {
+		return background
 	}
 
-	unitDir := r.Direction().GetNormal()
-	t := 0.5 * (unitDir.Y() + 1.0)
-	unit := vec.NewUnit()
-	blue := vec.New(0.5, 0.7, 1.0)
-	return color.FromVec3(unit.MulScalar(1.0 - t).Add(blue.MulScalar(t)))
+	scattered := new(vec.Ray)
+	attenuation := c.Black()
+	emitted := rec.Mat.Emitted(rec.U, rec.V, rec.P)
+
+	isScut, scattered, attenuation := rec.Mat.Scatter(r, rec, attenuation, scattered)
+	if !isScut {
+		return emitted
+	}
+	return attenuation.Mul(getPixelColor(scattered, background, world, depth-1))
 }
 
 // sample samples rays for anti-aliasing
-func sample(world *h.World, camera *cam.Camera, samples, width, height, i, j int) *c.Color {
+func sample(world *h.World, camera *cam.Camera, background *c.Color, samples, width, height, i, j int) *c.Color {
 	rgb := c.Black()
 
 	for s := 0; s < samples; s++ {
@@ -53,7 +48,7 @@ func sample(world *h.World, camera *cam.Camera, samples, width, height, i, j int
 		v := (float64(j) + utils.Rand()) / float64(height)
 
 		ray := camera.GetRay(u, v)
-		rgb = rgb.Add(getPixelColor(ray, world, maxDepth))
+		rgb = rgb.Add(getPixelColor(ray, background, world, maxDepth))
 	}
 
 	// average
@@ -61,7 +56,7 @@ func sample(world *h.World, camera *cam.Camera, samples, width, height, i, j int
 }
 
 // Do performs the render, sampling each pixel the provided number of times
-func Do(world *h.World, camera *cam.Camera, cpus, samples, width, height int, ch chan<- int) image.Image {
+func Do(world *h.World, camera *cam.Camera, background *c.Color, cpus, samples, width, height int, ch chan<- int) image.Image {
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 
 	var wg sync.WaitGroup
@@ -74,7 +69,7 @@ func Do(world *h.World, camera *cam.Camera, cpus, samples, width, height int, ch
 
 			for row := i; row < height; row += cpus {
 				for col := 0; col < width; col++ {
-					rgb := sample(world, camera, samples, width, height, col, row)
+					rgb := sample(world, camera, background, samples, width, height, col, row)
 					img.Set(col, height-row-1, rgb)
 				}
 				ch <- 1

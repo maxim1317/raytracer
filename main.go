@@ -12,7 +12,8 @@ import (
 	"time"
 
 	"github.com/maxim1317/raytracer/cam"
-	h "github.com/maxim1317/raytracer/hittable"
+	"github.com/maxim1317/raytracer/color"
+	"github.com/maxim1317/raytracer/hittable"
 	"github.com/maxim1317/raytracer/render"
 	"github.com/maxim1317/raytracer/vec"
 )
@@ -30,13 +31,10 @@ const (
 	minSamples  = 1
 	minAperture = 0.001
 
-	fov         = 20.0
 	aspectRatio = 4.0 / 3.0
 	width       = 400
 	height      = int(width / aspectRatio)
 	samples     = 100
-	aperture    = 0.01
-	distToFocus = 11.0
 
 	progressBarWidth = 80
 )
@@ -60,9 +58,12 @@ var (
 		".jpeg": jpegType,
 	}
 
-	lookFrom *vec.Vec3 = vec.New(13, 2, 3)
-	lookAt   *vec.Vec3 = vec.New(0, 0, 0)
-	vUp      *vec.Vec3 = vec.New(0, 1, 0)
+	lookFrom    *vec.Vec3 = vec.New(13, 2, 3)
+	lookAt      *vec.Vec3 = vec.New(0, 0, 0)
+	vUp         *vec.Vec3 = vec.New(0, 1, 0)
+	vFov        float64   = 40.0
+	aperture    float64   = 0.0
+	distToFocus float64   = 10.0
 )
 
 func main() {
@@ -72,13 +73,32 @@ func main() {
 
 	// World
 
-	world := h.TwoSphereWorld()
+	var world *hittable.World
+	background := color.Black()
+
+	switch 1 {
+	case 1:
+		world = hittable.RandomWorld()
+		background = color.New(0.70, 0.80, 1.00)
+		lookFrom = vec.New(13, 2, 3)
+		lookAt = vec.New(0, 0, 0)
+		vFov = 20.0
+		aperture = 0.1
+	case 2:
+		world = hittable.TwoSphereWorld()
+		background = color.New(0.70, 0.80, 1.00)
+		lookFrom = vec.New(13, 2, 3)
+		lookAt = vec.New(0, 0, 0)
+		vFov = 20.0
+	case 3:
+		background = color.New(0.0, 0.0, 0.0)
+	}
 
 	// Camera
 
 	camera := cam.NewCamera(
 		lookFrom, lookAt, vUp,
-		fov, float64(width)/float64(height),
+		vFov, float64(width)/float64(height),
 		aperture, distToFocus,
 		0.0, 1.0,
 	)
@@ -86,14 +106,14 @@ func main() {
 	// Render
 
 	fmt.Printf("\nRendering %d x %d pixel scene with %d objects:", width, height, world.Count())
-	fmt.Printf("\n[%d cpus, %d samples/pixel, %.2f° fov, %.2f aperture]", cpus, samples, fov, aperture)
+	fmt.Printf("\n[%d cpus, %d samples/pixel, %.2f° vFov, %.2f aperture]", cpus, samples, vFov, aperture)
 
 	ch := make(chan int, height)
 	defer close(ch)
 
 	go outputProgress(ch, height)
 
-	image := render.Do(world, camera, cpus, samples, width, height, ch)
+	image := render.Do(world, camera, background, cpus, samples, width, height, ch)
 
 	if err := writeFile("out.png", image); err != nil {
 		fmt.Println("Error:", err)

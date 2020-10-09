@@ -28,3 +28,7 @@ func (l Lambertian) Scatter(rIn *vec.Ray, rec *HitRecord, attenuation *c.Color, 
 	attenuation = l.albedo.Value(rec.U, rec.V, rec.P)
 	return true, scattered, attenuation
 }
+
+func (l Lambertian) Emitted(u, v float64, p *vec.Vec3) *c.Color {
+	return c.Black()
+}
