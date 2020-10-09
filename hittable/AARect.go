@@ -18,9 +18,9 @@ func NewXYRect(x0, x1, y0, y1, k float64, mat Material) *XYRect {
 	}
 }
 
-func (rect *XYRect) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
+func (rect *XYRect) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
 	t := (rect.k - r.Origin().Z()) / r.Direction().Z()
-	if t < tMin || t > tMax {
+	if t < t0 || t > t1 {
 		return false, rec
 	}
 	x := r.Origin().X() + t*r.Direction().X()
@@ -59,9 +59,9 @@ func NewYZRect(y0, y1, z0, z1, k float64, mat Material) *YZRect {
 	}
 }
 
-func (rect *YZRect) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
+func (rect *YZRect) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
 	t := (rect.k - r.Origin().X()) / r.Direction().X()
-	if t < tMin || t > tMax {
+	if t < t0 || t > t1 {
 		return false, rec
 	}
 	y := r.Origin().Y() + t*r.Direction().Y()
@@ -100,9 +100,9 @@ func NewXZRect(x0, x1, z0, z1, k float64, mat Material) *XZRect {
 	}
 }
 
-func (rect *XZRect) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
+func (rect *XZRect) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
 	t := (rect.k - r.Origin().Y()) / r.Direction().Y()
-	if t < tMin || t > tMax {
+	if t < t0 || t > t1 {
 		return false, rec
 	}
 	x := r.Origin().X() + t*r.Direction().X()

@@ -25,7 +25,7 @@ func NewAABB(min, max *vec.Vec3) *AABB {
 	}
 }
 
-func (b *AABB) Hit(r *vec.Ray, tMin, tMax float64) bool {
+func (b *AABB) Hit(r *vec.Ray, t0, t1 float64) bool {
 	for i := 0; i < 3; i++ {
 		var t0, t1, invD float64
 		invD = 1.0 / r.Direction().X()
@@ -34,9 +34,9 @@ func (b *AABB) Hit(r *vec.Ray, tMin, tMax float64) bool {
 		if invD < 0.0 {
 			t0, t1 = t1, t0
 		}
-		tMin = math.Max(t0, tMin)
-		tMax = math.Min(t1, tMax)
-		if tMax <= tMin {
+		t0 = math.Max(t0, t0)
+		t1 = math.Min(t1, t1)
+		if t1 <= t0 {
 			return false
 		}
 

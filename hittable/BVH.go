@@ -13,16 +13,16 @@ type BVHNode struct {
 	box         *AABB
 }
 
-func (n *BVHNode) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
-	if !n.box.Hit(r, tMin, tMax) {
+func (n *BVHNode) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
+	if !n.box.Hit(r, t0, t1) {
 		return false, rec
 	}
 
-	hitLeft, rec := n.left.Hit(r, tMin, tMax, rec)
+	hitLeft, rec := n.left.Hit(r, t0, t1, rec)
 	if hitLeft {
-		tMax = rec.T
+		t1 = rec.T
 	}
-	hitRight, rec := n.right.Hit(r, tMin, tMax, rec)
+	hitRight, rec := n.right.Hit(r, t0, t1, rec)
 
 	return hitLeft || hitRight, rec
 }

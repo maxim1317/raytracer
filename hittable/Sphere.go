@@ -40,7 +40,7 @@ func GetSphereUV(p *vec.Vec3, u, v float64) (float64, float64) {
 	return u, v
 }
 
-func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
+func (s *Sphere) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
 
 	// t^2*b*b + 2*t*b*(A−C) + (A−C)*(A−C) − r^2 = 0
 
@@ -57,7 +57,7 @@ func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *Hit
 		var root = math.Sqrt(discriminant)
 
 		var temp = (-halfb - root) / a
-		if temp < tMax && temp > tMin {
+		if temp < t1 && temp > t0 {
 			rec.T = temp
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center()).DivScalar(s.Radius())
@@ -68,7 +68,7 @@ func (s *Sphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *Hit
 		}
 
 		temp = (-halfb + root) / a
-		if temp < tMax && temp > tMin {
+		if temp < t1 && temp > t0 {
 			rec.T = temp
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center()).DivScalar(s.Radius())

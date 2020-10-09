@@ -19,12 +19,12 @@ func (w *World) Count() int {
 	return len(w.elements)
 }
 
-func (w *World) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
+func (w *World) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
 	hitAnything := false
-	closest := tMax
+	closest := t1
 
 	for _, element := range w.elements {
-		hit, rec := (*element).Hit(r, tMin, closest, rec)
+		hit, rec := (*element).Hit(r, t0, closest, rec)
 
 		if hit {
 			hitAnything = true
@@ -62,7 +62,7 @@ func NewRandomWorld() *World {
 	world := new(World)
 
 	// auto checker = make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
-	// world.add(make_shared<sphere>(point3(0,-1000,0), 1000, NewLambertianColored(checker)));
+	// world.add(make_shared<sphere>(vec.New(0,-1000,0), 1000, NewLambertianColored(checker)));
 
 	groundMaterial := NewLambertianTextured(
 		texture.NewCheckerColored(
@@ -167,6 +167,9 @@ func NewCornellBox() *World {
 	world.Add(NewXZRect(0, 555, 0, 555, 0, white))
 	world.Add(NewXZRect(0, 555, 0, 555, 555, white))
 	world.Add(NewXYRect(0, 555, 0, 555, 555, white))
+
+	world.Add(NewBox(vec.New(130, 0, 65), vec.New(295, 165, 230), white))
+	world.Add(NewBox(vec.New(265, 0, 295), vec.New(430, 330, 460), white))
 
 	return world
 }

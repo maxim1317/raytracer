@@ -41,7 +41,7 @@ func NewMovingSphere(
 	}
 }
 
-func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool, *HitRecord) {
+func (s *MovingSphere) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
 
 	// t^2*b*b + 2*t*b*(A−C) + (A−C)*(A−C) − r^2 = 0
 
@@ -58,7 +58,7 @@ func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool
 		var root = math.Sqrt(discriminant)
 
 		var temp = (-halfb - root) / a
-		if temp < tMax && temp > tMin {
+		if temp < t1 && temp > t0 {
 			rec.T = temp
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center(r.Time())).DivScalar(s.radius)
@@ -68,7 +68,7 @@ func (s *MovingSphere) Hit(r *vec.Ray, tMin, tMax float64, rec *HitRecord) (bool
 		}
 
 		temp = (-halfb + root) / a
-		if temp < tMax && temp > tMin {
+		if temp < t1 && temp > t0 {
 			rec.T = temp
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center(r.Time())).DivScalar(s.radius)
