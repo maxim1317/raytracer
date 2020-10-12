@@ -31,7 +31,7 @@ func (b AABB) Hit(r *vec.Ray, t0, t1 float64) bool {
 		tMin := (b.Min().Ind(i) - r.Origin().Ind(i)) * invD
 		tMax := (b.Max().Ind(i) - r.Origin().Ind(i)) * invD
 		if invD < 0.0 {
-			t0, t1 = t1, t0
+			tMin, tMax = tMax, tMin
 		}
 		t0 = math.Max(tMin, t0)
 		t1 = math.Min(tMax, t1)
