@@ -62,7 +62,7 @@ func (s *Sphere) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitReco
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center()).DivScalar(s.Radius())
 			rec.SetFaceNormal(r, outwardNormal)
-			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center()).DivScalar(s.Radius())), rec.U, rec.V)
+			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center())).DivScalar(s.Radius()), rec.U, rec.V)
 			rec.Mat = s.Mat()
 			return true, rec
 		}
@@ -73,7 +73,7 @@ func (s *Sphere) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitReco
 			rec.P = r.At(rec.T)
 			outwardNormal := rec.P.Sub(s.Center()).DivScalar(s.Radius())
 			rec.SetFaceNormal(r, outwardNormal)
-			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center()).DivScalar(s.Radius())), rec.U, rec.V)
+			rec.U, rec.V = GetSphereUV((rec.P.Sub(s.Center())).DivScalar(s.Radius()), rec.U, rec.V)
 			rec.Mat = s.Mat()
 			return true, rec
 		}

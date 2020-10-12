@@ -8,54 +8,23 @@ import (
 )
 
 type World struct {
-	elements []Hittable
+	elements HittableList
 }
 
 func (w *World) Add(h Hittable) {
-	w.elements = append(w.elements, h)
+	w.elements.Add(h)
 }
 
 func (w *World) Count() int {
-	return len(w.elements)
+	return w.elements.Count()
 }
 
 func (w *World) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
-	hitAnything := false
-	closest := t1
-
-	for _, element := range w.elements {
-		hit, rec := element.Hit(r, t0, closest, rec)
-
-		if hit {
-			hitAnything = true
-			closest = rec.T
-		}
-	}
-	return hitAnything, rec
+	return w.elements.Hit(r, t0, t1, rec)
 }
 
 func (w *World) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
-	if w.Count() == 0 {
-		return false, outputBox
-	}
-
-	tempBox := new(AABB)
-	firstBox := true
-	var bFlag bool
-
-	for _, element := range w.elements {
-		bFlag, tempBox = element.BoundingBox(t0, t1, tempBox)
-		if !bFlag {
-			return false, outputBox
-		}
-		if firstBox {
-			outputBox = tempBox
-		} else {
-			outputBox = SurroundingBox(outputBox, tempBox)
-		}
-	}
-
-	return true, outputBox
+	return w.elements.BoundingBox(t0, t1, outputBox)
 }
 
 func NewRandomWorld() *World {
@@ -158,27 +127,30 @@ func NewTwoBoxWorld() *World {
 
 	red := NewLambertianColored(color.New(0.65, 0.05, 0.05))
 	// white := NewLambertianColored(color.New(0.73, 0.73, 0.73))
-	// green := NewLambertianColored(color.New(0.12, 0.45, 0.15))
+	green := NewLambertianColored(color.New(0.12, 0.45, 0.15))
 	// blue := NewLambertianColored(color.New(0.5, 0.05, 0.65))
 	// light := NewDiffuseLightColored(color.New(15, 15, 15))
 
-	// var box1 Hittable
+	var box1 Hittable
 	var box2 Hittable
 
 	world.Add(NewXZRect(-100, 100, -100, 100, 0, red))
 
-	// box1 = NewBox(vec.New(-2, 0, -2), vec.New(0, 2, 0), green)
-	// box1 = NewRotateY(box1, 45)
-	// box1 = NewTranslate(box1, vec.New(0, 1, 0))
+	box1 = NewBox(vec.New(-2, 0, -2), vec.New(0, 2, 0), green)
+	box1 = NewRotateY(box1, -90)
+	box1 = NewTranslate(box1, vec.New(0, 1, 0))
 
 	// box2 = NewBox(vec.New(-2, 0, 0), vec.New(0, 2, 2), blue)
 	// world.Add(box2)
-	imgtext := texture.NewImageTexture("world.jpg")
-	t2 := NewLambertianTextured(imgtext)
-	box2 = NewSphere(vec.New(-1, 1, 1), 1, t2)
-	box2 = NewRotateY(box2, -60)
-	box2 = NewTranslate(box2, vec.New(0, 1, 0))
-	// world.Add(box1)
+
+	metal := NewMetal(color.New(0.5, 0.05, 0.65), 0)
+
+	// imgtext := texture.NewImageTexture("world.jpg")
+	// t2 := NewLambertianTextured(imgtext)
+	box2 = NewSphere(vec.New(-1, 1, 1), 1, metal)
+	// box2 = NewRotateY(box2, 0)
+	// box2 = NewTranslate(box2, vec.New(0, 1, 0))
+	world.Add(box1)
 	world.Add(box2)
 
 	return world
@@ -203,7 +175,7 @@ func NewCornellBox() *World {
 	// var box2 Hittable
 
 	box1 := NewBox(vec.NewZero(), vec.New(165, 330, 165), white)
-	box1Rotated := NewRotateY(box1, 18)
+	box1Rotated := NewRotateY(box1, 15)
 	box1RotatedTranslated := NewTranslate(box1Rotated, vec.New(265, 0, 295))
 	world.Add(box1RotatedTranslated)
 

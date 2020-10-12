@@ -75,7 +75,7 @@ func main() {
 	var world *hittable.World
 	background := color.Black()
 
-	switch 5 {
+	switch 4 {
 	case 1:
 		world = hittable.NewRandomWorld()
 		background = color.New(0.70, 0.80, 1.00)

@@ -29,6 +29,46 @@ type Hittable interface {
 	BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB)
 }
 
+type Translate struct {
+	ptr    Hittable
+	offset *vec.Vec3
+}
+
+func NewTranslate(ptr Hittable, offset *vec.Vec3) *Translate {
+	return &Translate{
+		ptr:    ptr,
+		offset: offset,
+	}
+}
+
+func (b *Translate) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
+	movedR := vec.NewRay(r.Origin().Sub(b.offset), r.Direction(), r.Time())
+
+	hit, rec := b.ptr.Hit(movedR, t0, t1, rec)
+	if !hit {
+		return false, rec
+	}
+
+	rec.P = rec.P.Add(b.offset)
+	rec.SetFaceNormal(movedR, rec.Normal)
+
+	return true, rec
+}
+
+func (b *Translate) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
+	bb, outputBox := b.ptr.BoundingBox(t0, t1, outputBox)
+	if !bb {
+		return false, outputBox
+	}
+
+	outputBox = NewAABB(
+		outputBox.Min().Add(b.offset),
+		outputBox.Max().Add(b.offset),
+	)
+
+	return true, outputBox
+}
+
 type RotateY struct {
 	ptr                Hittable
 	sinTheta, cosTheta float64
@@ -79,8 +119,8 @@ func (r *RotateY) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
 }
 
 func (rot *RotateY) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
-	origin := r.Origin()
-	direction := r.Direction()
+	origin := r.Origin().Copy()
+	direction := r.Direction().Copy()
 
 	origin.SetInd(0, rot.cosTheta*r.Origin().Ind(0)-rot.sinTheta*r.Origin().Ind(2))
 	origin.SetInd(2, rot.sinTheta*r.Origin().Ind(0)+rot.cosTheta*r.Origin().Ind(2))
@@ -109,44 +149,4 @@ func (rot *RotateY) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitR
 	rec.SetFaceNormal(rotatedR, normal)
 
 	return true, rec
-}
-
-type Translate struct {
-	ptr    Hittable
-	offset *vec.Vec3
-}
-
-func NewTranslate(ptr Hittable, offset *vec.Vec3) *Translate {
-	return &Translate{
-		ptr:    ptr,
-		offset: offset,
-	}
-}
-
-func (b *Translate) Hit(r *vec.Ray, t0, t1 float64, rec *HitRecord) (bool, *HitRecord) {
-	movedR := vec.NewRay(r.Origin().Sub(b.offset), r.Direction(), r.Time())
-
-	hit, rec := b.ptr.Hit(movedR, t0, t1, rec)
-	if !hit {
-		return false, rec
-	}
-
-	rec.P = rec.P.Add(b.offset)
-	rec.SetFaceNormal(movedR, rec.Normal)
-
-	return true, rec
-}
-
-func (b *Translate) BoundingBox(t0, t1 float64, outputBox *AABB) (bool, *AABB) {
-	bb, outputBox := b.ptr.BoundingBox(t0, t1, outputBox)
-	if !bb {
-		return false, outputBox
-	}
-
-	outputBox = NewAABB(
-		outputBox.Min().Add(b.offset),
-		outputBox.Max().Add(b.offset),
-	)
-
-	return true, outputBox
 }
