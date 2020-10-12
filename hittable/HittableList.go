@@ -10,6 +10,18 @@ func (w *HittableList) Add(h Hittable) {
 	w.elements = append(w.elements, &h)
 }
 
+func (w *HittableList) Ind(i uint) *Hittable {
+	return w.elements[i]
+}
+
+func (w *HittableList) Slice(from, to uint) []*Hittable {
+	return w.elements[from:to]
+}
+
+func (w *HittableList) SetInd(i uint, v *Hittable) {
+	w.elements[i] = v
+}
+
 func (w *HittableList) Count() int {
 	return len(w.elements)
 }
