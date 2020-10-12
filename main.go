@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cheggaaa/pb/v3"
 	"github.com/maxim1317/raytracer/cam"
 	"github.com/maxim1317/raytracer/color"
 	"github.com/maxim1317/raytracer/hittable"
@@ -75,7 +76,7 @@ func main() {
 	var world *hittable.World
 	background := color.Black()
 
-	switch 4 {
+	switch 7 {
 	case 1:
 		world = hittable.NewRandomWorld()
 		background = color.New(0.70, 0.80, 1.00)
@@ -97,15 +98,6 @@ func main() {
 		samples = 400
 		vfov = 20.0
 	case 4:
-		world = hittable.NewCornellBox()
-		width = 600
-		aspectRatio = 1.0
-		samples = 10
-		background = color.Black()
-		lookfrom = vec.New(278, 278, -800)
-		lookat = vec.New(278, 278, 0)
-		vfov = 40.0
-	case 5:
 		world = hittable.NewTwoBoxWorld()
 		background = color.New(0.70, 0.80, 1.00)
 		lookfrom = vec.New(13, 3, 0)
@@ -113,6 +105,35 @@ func main() {
 		aspectRatio = 1.0
 		samples = 10
 		vfov = 20.0
+	case 5:
+		world = hittable.NewCornellBox()
+		width = 600
+		aspectRatio = 1.0
+		samples = 200
+		background = color.Black()
+		lookfrom = vec.New(278, 278, -800)
+		lookat = vec.New(278, 278, 0)
+		vfov = 40.0
+	case 6:
+		world = hittable.NewCornellSmoke()
+		width = 600
+		aspectRatio = 1.0
+		samples = 400
+		background = color.Black()
+		lookfrom = vec.New(278, 278, -800)
+		lookat = vec.New(278, 278, 0)
+		vfov = 40.0
+	case 7:
+		world = hittable.NewFinalScene()
+		aperture = 0
+		aspectRatio = 1.0
+		width = 800
+		samples = 10000
+		background = color.Black()
+		lookfrom = vec.New(478, 278, -600)
+		lookat = vec.New(278, 278, 0)
+		vfov = 40.0
+		break
 	}
 
 	// Camera
@@ -131,10 +152,10 @@ func main() {
 	fmt.Printf("\nRendering %d x %d pixel scene with %d objects:", width, height, world.Count())
 	fmt.Printf("\n[%d cpus, %d samples/pixel, %.2f° vfov, %.2f aperture]", cpus, samples, vfov, aperture)
 
-	ch := make(chan int, height)
+	ch := make(chan int, height*width)
 	defer close(ch)
 
-	go outputProgress(ch, height)
+	go outputProgress(ch, height*width)
 
 	image := render.Do(world, camera, background, cpus, samples, width, height, ch)
 
@@ -148,15 +169,18 @@ func main() {
 }
 
 func outputProgress(ch <-chan int, rows int) {
-	fmt.Println()
+	bar := pb.Full.Start(rows)
+	// fmt.Println()
 	for i := 1; i <= rows; i++ {
 		<-ch
-		pct := 100 * float64(i) / float64(rows)
-		filled := (progressBarWidth * i) / rows
-		bar := strings.Repeat("=", filled) + strings.Repeat("-", progressBarWidth-filled)
-		fmt.Printf("\r[%s] %.2f%%", bar, pct)
+		bar.Increment()
+		// 	pct := 100 * float64(i) / float64(rows)
+		// 	filled := (progressBarWidth * i) / rows
+		// 	bar := strings.Repeat("=", filled) + strings.Repeat("-", progressBarWidth-filled)
+		// 	fmt.Printf("\r[%s] %.2f%%", bar, pct)
 	}
-	fmt.Println()
+	// fmt.Println()
+	bar.Finish()
 }
 
 func writeFile(path string, img image.Image) error {

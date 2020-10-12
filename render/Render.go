@@ -54,7 +54,7 @@ func sample(world *h.World, camera *cam.Camera, background *c.Color, samples, wi
 	}
 
 	// average
-	return rgb.DivScalar(float64(samples)).Gamma2().Clip(0.0, 1.0)
+	return rgb.DivScalar(float64(samples)).Clip(0.0, 1.0)
 }
 
 // Do performs the render, sampling each pixel the provided number of times
@@ -65,16 +65,14 @@ func Do(world *h.World, camera *cam.Camera, background *c.Color, cpus, samples, 
 
 	for i := 0; i < cpus; i++ {
 		wg.Add(1)
-
 		go func(i int) {
 			defer wg.Done()
-
-			for row := i; row < height; row += cpus {
-				for col := 0; col < width; col++ {
+			for row := 0; row < height; row++ {
+				for col := i; col < width; col += cpus {
 					rgb := sample(world, camera, background, samples, width, height, col, row)
 					img.Set(col, height-row-1, rgb)
+					ch <- 1
 				}
-				ch <- 1
 			}
 		}(i)
 	}

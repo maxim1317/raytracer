@@ -31,7 +31,7 @@ func NewRandomWorld() *World {
 	world := new(World)
 
 	// auto checker = make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
-	// world.add(make_shared<sphere>(vec.New(0,-1000,0), 1000, NewLambertianColored(checker)));
+	// world.Add(make_shared<sphere>(vec.New(0,-1000,0), 1000, NewLambertianColored(checker)));
 
 	groundMaterial := NewLambertianTextured(
 		texture.NewCheckerColored(
@@ -179,10 +179,106 @@ func NewCornellBox() *World {
 	box1RotatedTranslated := NewTranslate(box1Rotated, vec.New(265, 0, 295))
 	world.Add(box1RotatedTranslated)
 
-	box2 := NewBox(vec.NewZero(), vec.New(165, 165, 165), red)
+	box2 := NewBox(vec.NewZero(), vec.New(165, 165, 165), white)
 	box2Rotated := NewRotateY(box2, -18)
 	box2Translated := NewTranslate(box2Rotated, vec.New(130, 0, 65))
 	world.Add(box2Translated)
+
+	return world
+}
+
+func NewCornellSmoke() *World {
+	world := new(World)
+
+	red := NewLambertianColored(color.New(0.65, 0.05, 0.05))
+	white := NewLambertianColored(color.New(0.73, 0.73, 0.73))
+	green := NewLambertianColored(color.New(0.12, 0.45, 0.15))
+	light := NewDiffuseLightColored(color.New(15, 15, 15))
+
+	world.Add(NewYZRect(0, 555, 0, 555, 555, green))
+	world.Add(NewYZRect(0, 555, 0, 555, 0, red))
+	world.Add(NewXZRect(213, 343, 227, 332, 554, light))
+	world.Add(NewXZRect(0, 555, 0, 555, 0, white))
+	world.Add(NewXZRect(0, 555, 0, 555, 555, white))
+	world.Add(NewXYRect(0, 555, 0, 555, 555, white))
+
+	var box1 Hittable
+	var box2 Hittable
+
+	box1 = NewBox(vec.NewZero(), vec.New(165, 330, 165), white)
+	box1 = NewRotateY(box1, 15)
+	box1 = NewTranslate(box1, vec.New(265, 0, 295))
+	world.Add(NewConstantMediumColored(box1, 0.01, color.Black()))
+
+	box2 = NewBox(vec.NewZero(), vec.New(165, 165, 165), white)
+	box2 = NewRotateY(box2, -18)
+	box2 = NewTranslate(box2, vec.New(130, 0, 65))
+	world.Add(NewConstantMediumColored(box2, 0.01, color.White()))
+
+	return world
+}
+
+func NewFinalScene() *World {
+	world := new(World)
+	boxes1 := new(HittableList)
+	ground := NewLambertianColored(color.New(0.48, 0.83, 0.53))
+
+	boxesPerSide := 20
+	for i := 0; i < boxesPerSide; i++ {
+		for j := 0; j < boxesPerSide; j++ {
+			w := 100.0
+			x0 := -1000.0 + float64(i)*w
+			z0 := -1000.0 + float64(j)*w
+			y0 := 0.0
+			x1 := x0 + w
+			y1 := utils.RandRange(1, 101)
+			z1 := z0 + w
+
+			boxes1.Add(NewBox(vec.New(x0, y0, z0), vec.New(x1, y1, z1), ground))
+		}
+	}
+
+	world.Add(NewBVHNode(*boxes1, 0, 1))
+
+	light := NewDiffuseLightColored(color.New(7, 7, 7))
+	world.Add(NewXZRect(123, 423, 147, 412, 554, light))
+
+	center1 := vec.New(400, 400, 200)
+	center2 := center1.Add(vec.New(30, 0, 0))
+	movingSphereMaterial := NewLambertianColored(color.New(0.7, 0.3, 0.1))
+	world.Add(NewMovingSphere(center1, center2, 0, 1, 50, movingSphereMaterial))
+
+	world.Add(NewSphere(vec.New(260, 150, 45), 50, NewDielectric(1.5)))
+	world.Add(NewSphere(vec.New(0, 150, 145), 50, NewMetal(color.New(0.8, 0.8, 0.9), 1.0)))
+
+	boundary := NewSphere(vec.New(360, 150, 145), 70, NewDielectric(1.5))
+	world.Add(boundary)
+	world.Add(NewConstantMediumColored(boundary, 0.2, color.New(0.2, 0.4, 0.9)))
+	boundary = NewSphere(vec.New(0, 0, 0), 5000, NewDielectric(1.5))
+	world.Add(NewConstantMediumColored(boundary, .0001, color.New(1, 1, 1)))
+
+	emat := NewLambertianTextured(texture.NewImageTexture("world.jpg"))
+	world.Add(NewSphere(vec.New(400, 200, 400), 100, emat))
+	pertext := texture.NewNoiseTexture(0.1)
+	world.Add(NewSphere(vec.New(220, 280, 300), 80, NewLambertianTextured(pertext)))
+
+	boxes2 := new(HittableList)
+	white := NewLambertianColored(color.New(0.73, 0.73, 0.73))
+	ns := 1000
+	for j := 0; j < ns; j++ {
+		boxes2.Add(
+			NewSphere(vec.NewRandInRange(0, 165), 10, white),
+		)
+	}
+
+	world.Add(
+		NewTranslate(
+			NewRotateY(
+				NewBVHNode(*boxes2, 0.0, 1.0), 15,
+			),
+			vec.New(-100, 270, 395),
+		),
+	)
 
 	return world
 }
